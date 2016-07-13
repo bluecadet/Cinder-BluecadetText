@@ -29,13 +29,12 @@ protected:
 	StyledTextLayout mTextLayout;
 	ci::Surface mTextSurface;
 	gl::TextureRef mTextTexture;
-
-	ci::params::InterfaceGlRef mParams;
-
-	vector<string> mParamClipModes;
-	vector<string> mParamLayoutModes;
 	std::string mLoremIpsum;
 
+	// Debug properties
+	ci::params::InterfaceGlRef mParams;
+	vector<string> mParamClipModes;
+	vector<string> mParamLayoutModes;
 	bool mForceUpdates = false;
 	bool mOscillate = false;
 	bool mDrawTextBoxOnTop = false;
@@ -43,29 +42,50 @@ protected:
 
 void TextLayoutPropertyExplorerApp::setup()
 {
-	// Set up text parser
-	StyledTextParser::getInstance()->setDefaultOptions(StyledTextParser::OptionFlags::INVERT_NESTED_ITALICS);
 
-	// Set up style manager
-	StyleManager::getInstance()->setup(getAssetPath("Fonts/styles.json"), "styles");
+	/*
+	The font manager loads font definitions from a single json file.
+	These definitions determine which font families, weights and styles
+	are available.
 
-	// Set up font manager
+	Instances of StyledTextLayout will use the font manager to load the
+	appropriate fonts for a certain family, weight and style and the
+	FontManager will determine which font is returned based on the json.
+	*/
 	FontManager::getInstance()->setLogLevel(FontManager::LogLevel::Warning);
 	FontManager::getInstance()->setup(getAssetPath("Fonts/fonts.json"));
 
-	// Test content
+	/*
+	The style manager loads a single json that defines the default
+	style and all other styles that inherit from the default.
+
+	Any styles defined in that json can be used to format text in
+	the app. All StyledTextLayout instances use the shared style
+	manager to load styles.
+	*/
+	StyleManager::getInstance()->setup(getAssetPath("Fonts/styles.json"), "styles");
+
+	/*
+	A shared text parser is used to parse simple html tags from text
+	and return instances of StyledText. Here we configure the shared
+	instance to invert nested italics, which means that italics within
+	italics will become regular (e.g. <i>italic <i>regular</i> italic</i>).
+	*/
+	StyledTextParser::getInstance()->setDefaultOptions(StyledTextParser::OptionFlags::INVERT_NESTED_ITALICS);
+
+	// Loads a file with some placeholder text
 	loadText();
 
-	// Configure text
+	// Configure text layout
 	mTextLayout.setMaxWidth((float)getWindowWidth() * 0.5f);
 	mTextLayout.setClipMode(StyledTextLayout::ClipMode::Clip);
 	mTextLayout.setLayoutMode(StyledTextLayout::LayoutMode::WordWrap);
 	mTextLayout.setPadding(10.f, 10.f, 10.f, 10.f);
 
-	// sets and renders text
+	// Sets the text of the StyledTextLayout instance and renders it to a texture
 	updateText();
 
-	// Configure params
+	// Configure debug parameters
 	mParamClipModes.push_back("Clip");
 	mParamClipModes.push_back("NoClip");
 
@@ -115,12 +135,12 @@ void TextLayoutPropertyExplorerApp::draw()
 	{
 		gl::ScopedMatrices scopedMatrices;
 
-		// update here to react to window resize immediately
+		// update in draw() to react to window resize immediately
 		if (mForceUpdates) {
 			updateText();
 		}
 
-		// oscilate view pos
+		// oscilate text position to test aliasing on subpixels
 		if (mOscillate) {
 			gl::translate(
 				20.0f * cosf((float)getElapsedSeconds()),
@@ -132,11 +152,11 @@ void TextLayoutPropertyExplorerApp::draw()
 		gl::color(Color::white());
 		gl::draw(mTextTexture);
 
-		// draw padding
+		// draw padding outline
 		gl::color(ColorA(1.0f, 0.0f, 0.0f, 0.75f));
 		gl::drawStrokedRect(ci::Rectf(mTextLayout.getPaddingLeft(), mTextLayout.getPaddingTop(), mTextTexture->getWidth() - mTextLayout.getPaddingRight(), mTextTexture->getHeight() - mTextLayout.getPaddingBottom()));
 
-		// draw max width
+		// draw max width and height outline
 		gl::color(ColorA(0.0f, 0.0f, 1.0f, 0.75f));
 		gl::drawStrokedRect(ci::Rectf(0.0f, 0.0f, mTextLayout.getMaxWidth(), (float)mTextTexture->getHeight()));
 	}
@@ -163,7 +183,7 @@ void TextLayoutPropertyExplorerApp::resize() {
 }
 
 CINDER_APP(TextLayoutPropertyExplorerApp,
-	RendererGl(RendererGl::Options().msaa(2)),
+	RendererGl(RendererGl::Options().msaa(2)), // use msaa > 1 to render text more smoothly
 	[&](ci::app::App::Settings *settings)
 {
 	settings->setWindowSize(900, 640);
