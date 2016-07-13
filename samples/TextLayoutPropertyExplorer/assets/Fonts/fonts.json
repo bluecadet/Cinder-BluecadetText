@@ -1,0 +1,26 @@
+{
+	"fonts": {
+		"OpenSans": {
+			"300":{
+				"normal": "OpenSans/OpenSans-Light.ttf",
+				"italic": "OpenSans/OpenSans-LightItalic.ttf"
+			},
+			"400":{
+				"normal": "OpenSans/OpenSans-Regular.ttf",
+				"italic": "OpenSans/OpenSans-Italic.ttf"
+			},
+			"500":{
+				"normal": "OpenSans/OpenSans-Semibold.ttf",
+				"italic": "OpenSans/OpenSans-SemiboldItalic.ttf"
+			},
+			"600":{
+				"normal": "OpenSans/OpenSans-Bold.ttf",
+				"italic": "OpenSans/OpenSans-BoldItalic.ttf"
+			},
+			"700": {
+				"normal": "OpenSans/OpenSans-ExtraBold.ttf",
+				"italic": "OpenSans/OpenSans-ExtraBoldItalic.ttf"
+			}
+		}
+	}
+}
