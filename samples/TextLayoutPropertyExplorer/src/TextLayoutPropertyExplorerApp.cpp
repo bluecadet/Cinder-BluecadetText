@@ -26,7 +26,7 @@ public:
 
 protected:
 
-	StyledTextLayout mTextLayout;
+	StyledTextLayoutRef mTextLayout;
 	ci::Surface mTextSurface;
 	gl::TextureRef mTextTexture;
 	std::string mLoremIpsum;
@@ -77,10 +77,11 @@ void TextLayoutPropertyExplorerApp::setup()
 	loadText();
 
 	// Configure text layout
-	mTextLayout.setMaxWidth((float)getWindowWidth() * 0.5f);
-	mTextLayout.setClipMode(StyledTextLayout::ClipMode::Clip);
-	mTextLayout.setLayoutMode(StyledTextLayout::LayoutMode::WordWrap);
-	mTextLayout.setPadding(10.f, 10.f, 10.f, 10.f);
+	mTextLayout = StyledTextLayoutRef(new StyledTextLayout());
+	mTextLayout->setMaxWidth((float)getWindowWidth() * 0.5f);
+	mTextLayout->setClipMode(StyledTextLayout::ClipMode::Clip);
+	mTextLayout->setLayoutMode(StyledTextLayout::LayoutMode::WordWrap);
+	mTextLayout->setPadding(10.f, 10.f, 10.f, 10.f);
 
 	// Sets the text of the StyledTextLayout instance and renders it to a texture
 	updateText();
@@ -97,21 +98,21 @@ void TextLayoutPropertyExplorerApp::setup()
 	mParams->addParam("Text", &mLoremIpsum).updateFn([&] { updateText(); });
 	mParams->addButton("Reload", [&] { loadText(); updateText(); });
 	mParams->addSeparator();
-	mParams->addParam("Clip Mode", mParamClipModes, [&](int v) { mTextLayout.setClipMode((StyledTextLayout::ClipMode)v); }, [&] { return (int)mTextLayout.getClipMode(); });
-	mParams->addParam("Layout Mode", mParamLayoutModes, [&](int v) { mTextLayout.setLayoutMode((StyledTextLayout::LayoutMode)v); }, [&] { return (int)mTextLayout.getLayoutMode(); });
+	mParams->addParam("Clip Mode", mParamClipModes, [&](int v) { mTextLayout->setClipMode((StyledTextLayout::ClipMode)v); }, [&] { return (int)mTextLayout->getClipMode(); });
+	mParams->addParam("Layout Mode", mParamLayoutModes, [&](int v) { mTextLayout->setLayoutMode((StyledTextLayout::LayoutMode)v); }, [&] { return (int)mTextLayout->getLayoutMode(); });
 	mParams->addSeparator();
-	mParams->addParam<float>("Max Width", [&](float v) { mTextLayout.setMaxWidth(v); }, [&] { return mTextLayout.getMaxWidth(); });
-	mParams->addParam<float>("Padding Top", [&](float v) { mTextLayout.setPaddingTop(v); }, [&] { return mTextLayout.getPaddingTop(); });
-	mParams->addParam<float>("Padding Right", [&](float v) { mTextLayout.setPaddingRight(v); }, [&] { return mTextLayout.getPaddingRight(); });
-	mParams->addParam<float>("Padding Bottom", [&](float v) { mTextLayout.setPaddingBottom(v); }, [&] { return mTextLayout.getPaddingBottom(); });
-	mParams->addParam<float>("Padding Left", [&](float v) { mTextLayout.setPaddingLeft(v); }, [&] { return mTextLayout.getPaddingLeft(); });
+	mParams->addParam<float>("Max Width", [&](float v) { mTextLayout->setMaxWidth(v); }, [&] { return mTextLayout->getMaxWidth(); });
+	mParams->addParam<float>("Padding Top", [&](float v) { mTextLayout->setPaddingTop(v); }, [&] { return mTextLayout->getPaddingTop(); });
+	mParams->addParam<float>("Padding Right", [&](float v) { mTextLayout->setPaddingRight(v); }, [&] { return mTextLayout->getPaddingRight(); });
+	mParams->addParam<float>("Padding Bottom", [&](float v) { mTextLayout->setPaddingBottom(v); }, [&] { return mTextLayout->getPaddingBottom(); });
+	mParams->addParam<float>("Padding Left", [&](float v) { mTextLayout->setPaddingLeft(v); }, [&] { return mTextLayout->getPaddingLeft(); });
 	mParams->addSeparator();
 	mParams->addParam("Oscillate", &mOscillate);
 	mParams->addParam("Force Updates", &mForceUpdates);
 }
 
 void TextLayoutPropertyExplorerApp::update() {
-	if (mTextLayout.hasChanges() && !mForceUpdates) {
+	if (mTextLayout->hasChanges() && !mForceUpdates) {
 		updateText();
 	}
 }
@@ -121,10 +122,10 @@ void TextLayoutPropertyExplorerApp::loadText() {
 }
 
 void TextLayoutPropertyExplorerApp::updateText() {
-	mTextLayout.setText("This is a test title", "test.title");
-	mTextLayout.appendText("<br>" + mLoremIpsum, "test.body");
+	mTextLayout->setText("This is a test title", "test.title");
+	mTextLayout->appendText("<br>" + mLoremIpsum, "test.body");
 
-	mTextSurface = mTextLayout.renderToSurface();
+	mTextSurface = mTextLayout->renderToSurface();
 	mTextTexture = gl::Texture::create(mTextSurface);
 }
 
@@ -154,11 +155,11 @@ void TextLayoutPropertyExplorerApp::draw()
 
 		// draw padding outline
 		gl::color(ColorA(1.0f, 0.0f, 0.0f, 0.75f));
-		gl::drawStrokedRect(ci::Rectf(mTextLayout.getPaddingLeft(), mTextLayout.getPaddingTop(), mTextTexture->getWidth() - mTextLayout.getPaddingRight(), mTextTexture->getHeight() - mTextLayout.getPaddingBottom()));
+		gl::drawStrokedRect(ci::Rectf(mTextLayout->getPaddingLeft(), mTextLayout->getPaddingTop(), mTextTexture->getWidth() - mTextLayout->getPaddingRight(), mTextTexture->getHeight() - mTextLayout->getPaddingBottom()));
 
 		// draw max width and height outline
 		gl::color(ColorA(0.0f, 0.0f, 1.0f, 0.75f));
-		gl::drawStrokedRect(ci::Rectf(0.0f, 0.0f, mTextLayout.getMaxWidth(), (float)mTextTexture->getHeight()));
+		gl::drawStrokedRect(ci::Rectf(0.0f, 0.0f, mTextLayout->getMaxWidth(), (float)mTextTexture->getHeight()));
 	}
 
 	// draw debug info
@@ -172,7 +173,7 @@ void TextLayoutPropertyExplorerApp::draw()
 
 void TextLayoutPropertyExplorerApp::resize() {
 	float width = (float)getWindowWidth() * 0.5f;
-	mTextLayout.setMaxWidth(width);
+	mTextLayout->setMaxWidth(width);
 
 	updateText();
 	
