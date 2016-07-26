@@ -150,13 +150,13 @@ public:
 	void setMaxWidth(const float value);
 
 	//! Returns the text size including padding according to the current clip and wrap modes. If the StyledTextLayout has changes calling this method will trigger internal recalculations.
-	ci::ivec2 getSize();
+	ci::ivec2 getTextSize();
 
 	//! Returns the width of text including padding and according to the current clip mode. If the StyledTextLayout has changes calling this method will trigger internal recalculations.
-	int getWidth();
+	int getTextWidth();
 
 	//! Returns the height of text including padding and according to the current clip mode. If the StyledTextLayout has changes calling this method will trigger internal recalculations.
-	int getHeight();
+	int getTextHeight();
 
 
 
@@ -208,15 +208,6 @@ public:
 	//! Sets the font weight for any future text
 	void setFontWeight(const FontWeight fontWeight, bool updateExistingText = false);
 
-	//! Sets the background color for the StyledTextLayout
-	void setBackgroundColor(const ci::Color& color);
-
-	//! Sets the background color and alpha for the StyledTextLayout to unpremulitiplied color \a color
-	void setBackgroundColor(const ci::ColorA& color);
-
-	//! The background color of the StyledTextLayout. Includes padding.
-	ci::ColorA getBackgroundColor() const;
-
 
 
 
@@ -259,7 +250,7 @@ protected:
 	// Layout properties
 	bool		mHasInvalidLayout;
 	bool		mHasInvalidSize;
-	ci::ivec2	mSize;
+	ci::ivec2	mTextSize;
 
 	std::vector<StyledText> mSegments;
 	std::vector<std::shared_ptr<class Line>> mLines;
@@ -276,7 +267,6 @@ protected:
 	float		mPaddingRight;
 	float		mPaddingBottom;
 	float		mPaddingLeft;
-	ci::ColorA	mBackgroundColor;
 	Style		mCurrentStyle;
 };
 

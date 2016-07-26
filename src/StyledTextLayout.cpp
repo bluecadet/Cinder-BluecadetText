@@ -253,7 +253,6 @@ protected:
 // StyledTextLayout
 //
 StyledTextLayout::StyledTextLayout() :
-	mBackgroundColor(ci::ColorA(0.0f, 0.0f, 0.0f, 0.0f)),
 	mPaddingTop(0.0f),
 	mPaddingRight(0.0f),
 	mPaddingBottom(0.0f),
@@ -264,7 +263,7 @@ StyledTextLayout::StyledTextLayout() :
 	mLeadingDisabled(true),
 	mHasInvalidSize(false),
 	mHasInvalidLayout(false),
-	mSize(0, 0)
+	mTextSize(0, 0)
 {
 	// force any globals we need to be initialized, particularly GDI+ on Windows
 	TextManager::instance();
@@ -372,10 +371,6 @@ void StyledTextLayout::setLeadingOffset(float leadingOffset, bool updateExisting
 bool StyledTextLayout::getLeadingDisabled() const { return mLeadingDisabled; }
 void StyledTextLayout::setLeadingDisabled(const bool value, bool updateExistingText) { mLeadingDisabled = value; invalidate(); }
 
-ci::ColorA StyledTextLayout::getBackgroundColor() const { return mBackgroundColor; }
-void StyledTextLayout::setBackgroundColor(const ci::Color &color) { mBackgroundColor = color; }
-void StyledTextLayout::setBackgroundColor(const ci::ColorA &color) { mBackgroundColor = color; }
-
 float StyledTextLayout::getMaxWidth() const { return mMaxWidth; }
 void StyledTextLayout::setMaxWidth(const float value) { mMaxWidth = value; invalidate(); }
 
@@ -390,9 +385,9 @@ float StyledTextLayout::getPaddingRight() const { return mPaddingRight; };
 float StyledTextLayout::getPaddingBottom() const { return mPaddingBottom; };
 float StyledTextLayout::getPaddingLeft() const { return mPaddingLeft; };
 
-int StyledTextLayout::getWidth() { validateSize(); return mSize.x; }
-int StyledTextLayout::getHeight() { validateSize(); return mSize.y; }
-ci::ivec2 StyledTextLayout::getSize() { validateSize(); return mSize; }
+int StyledTextLayout::getTextWidth() { validateSize(); return mTextSize.x; }
+int StyledTextLayout::getTextHeight() { validateSize(); return mTextSize.y; }
+ci::ivec2 StyledTextLayout::getTextSize() { validateSize(); return mTextSize; }
 
 
 //==================================================
@@ -532,7 +527,7 @@ ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied)
 	validateSize();
 
 	ci::Surface result;
-	ci::ivec2 bitmapSize = getSize();
+	ci::ivec2 bitmapSize = getTextSize();
 
 	// Odd failure - return a NULL Surface
 	if (bitmapSize.x < 0 || bitmapSize.y < 0) {
@@ -550,8 +545,7 @@ ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied)
 	Gdiplus::Bitmap *offscreenBitmap = ci::msw::createGdiplusBitmap(result);
 	Gdiplus::Graphics *offscreenGraphics = Gdiplus::Graphics::FromImage(offscreenBitmap);
 	offscreenGraphics->SetTextRenderingHint(Gdiplus::TextRenderingHint::TextRenderingHintAntiAlias);
-	offscreenGraphics->Clear(Gdiplus::Color((BYTE)(mBackgroundColor.a * 255), (BYTE)(mBackgroundColor.r * 255),
-		(BYTE)(mBackgroundColor.g * 255), (BYTE)(mBackgroundColor.b * 255)));
+	//offscreenGraphics->Clear(Gdiplus::Color::Transparent);
 
 	// walk the lines and getSurface them, advancing our Y offset along the way
 	float currentY = mPaddingTop;
@@ -598,7 +592,7 @@ void StyledTextLayout::validateSize() {
 		return;
 	}
 
-	mSize = ci::ivec2(0, 0);
+	mTextSize = ci::ivec2(0, 0);
 
 	// Make sure padding doesn't exceed max width
 	if (mMaxWidth < 0.0f || mPaddingLeft + mPaddingRight <= mMaxWidth) {
@@ -626,7 +620,7 @@ void StyledTextLayout::validateSize() {
 			pixelHeight = 0;
 		}
 
-		mSize = ci::ivec2(pixelWidth, pixelHeight);
+		mTextSize = ci::ivec2(pixelWidth, pixelHeight);
 	}
 
 	mHasInvalidSize = false;
