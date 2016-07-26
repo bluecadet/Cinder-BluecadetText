@@ -545,7 +545,7 @@ ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied)
 	Gdiplus::Bitmap *offscreenBitmap = ci::msw::createGdiplusBitmap(result);
 	Gdiplus::Graphics *offscreenGraphics = Gdiplus::Graphics::FromImage(offscreenBitmap);
 	offscreenGraphics->SetTextRenderingHint(Gdiplus::TextRenderingHint::TextRenderingHintAntiAlias);
-	//offscreenGraphics->Clear(Gdiplus::Color::Transparent);
+	offscreenGraphics->Clear(Gdiplus::Color::Transparent);
 
 	// walk the lines and getSurface them, advancing our Y offset along the way
 	float currentY = mPaddingTop;
