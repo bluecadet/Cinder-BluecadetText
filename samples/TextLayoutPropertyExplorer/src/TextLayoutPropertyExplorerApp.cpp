@@ -100,8 +100,10 @@ void TextLayoutPropertyExplorerApp::setup()
 	mParams->addSeparator();
 	mParams->addParam("Clip Mode", mParamClipModes, [&](int v) { mTextLayout->setClipMode((StyledTextLayout::ClipMode)v); }, [&] { return (int)mTextLayout->getClipMode(); });
 	mParams->addParam("Layout Mode", mParamLayoutModes, [&](int v) { mTextLayout->setLayoutMode((StyledTextLayout::LayoutMode)v); }, [&] { return (int)mTextLayout->getLayoutMode(); });
+	mParams->addParam<bool>("Trim Size", [&](bool v) { mTextLayout->setSizeTrimmingEnabled(v); }, [&] { return mTextLayout->getSizeTrimmingEnabled(); });
 	mParams->addSeparator();
 	mParams->addParam<float>("Max Width", [&](float v) { mTextLayout->setMaxWidth(v); }, [&] { return mTextLayout->getMaxWidth(); });
+	mParams->addParam<float>("Max Height", [&](float v) { mTextLayout->setMaxHeight(v); }, [&] { return mTextLayout->getMaxHeight(); });
 	mParams->addParam<float>("Padding Top", [&](float v) { mTextLayout->setPaddingTop(v); }, [&] { return mTextLayout->getPaddingTop(); });
 	mParams->addParam<float>("Padding Right", [&](float v) { mTextLayout->setPaddingRight(v); }, [&] { return mTextLayout->getPaddingRight(); });
 	mParams->addParam<float>("Padding Bottom", [&](float v) { mTextLayout->setPaddingBottom(v); }, [&] { return mTextLayout->getPaddingBottom(); });
@@ -141,6 +143,8 @@ void TextLayoutPropertyExplorerApp::draw()
 			updateText();
 		}
 
+		gl::translate(20.0f, 20.0f);
+
 		// oscilate text position to test aliasing on subpixels
 		if (mOscillate) {
 			gl::translate(
@@ -153,13 +157,15 @@ void TextLayoutPropertyExplorerApp::draw()
 		gl::color(Color::white());
 		gl::draw(mTextTexture);
 
+		const Rectf bounds = Rectf(vec2(0.0f), mTextLayout->getTextSize());
+
 		// draw padding outline
 		gl::color(ColorA(1.0f, 0.0f, 0.0f, 0.75f));
-		gl::drawStrokedRect(ci::Rectf(mTextLayout->getPaddingLeft(), mTextLayout->getPaddingTop(), mTextTexture->getWidth() - mTextLayout->getPaddingRight(), mTextTexture->getHeight() - mTextLayout->getPaddingBottom()));
+		gl::drawStrokedRect(Rectf(bounds.x1 + mTextLayout->getPaddingLeft(), bounds.y1 + mTextLayout->getPaddingTop(), bounds.x2 - mTextLayout->getPaddingRight(), bounds.y2 - mTextLayout->getPaddingBottom()));
 
 		// draw max width and height outline
 		gl::color(ColorA(0.0f, 0.0f, 1.0f, 0.75f));
-		gl::drawStrokedRect(ci::Rectf(0.0f, 0.0f, mTextLayout->getMaxWidth(), (float)mTextTexture->getHeight()));
+		gl::drawStrokedRect(Rectf(vec2(0.0f), mTextLayout->getTextSize()));
 	}
 
 	// draw debug info

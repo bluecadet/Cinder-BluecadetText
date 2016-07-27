@@ -146,16 +146,16 @@ public:
 	void setClipMode(const ClipMode value);
 
 	// Combines max width and height. Defaults to (-1, -1), which disables max width and height, allowing both to expand infinitely.
-	ci::vec2 getMaxSize() const;
-	void setMaxSize(const ci::vec2 size);
+	virtual ci::vec2 getMaxSize() const;
+	virtual void setMaxSize(const ci::vec2& size);
 
 	//! Max width to use in combination with layout Clip and WordWrap. Defaults to -1.0. Widths smaller than 0 disable word wrapping and clipping.
-	float getMaxWidth() const;
-	void setMaxWidth(const float value);
+	virtual float getMaxWidth() const;
+	virtual void setMaxWidth(const float value);
 
 	//! Max height to use in combination with layout Clip. If Clip is enabled and maxHeight is > 0, then text will be clipped at maxHeight.
-	float getMaxHeight() const;
-	void setMaxHeight(const float value);
+	virtual float getMaxHeight() const;
+	virtual void setMaxHeight(const float value);
 
 	//! Returns the text size including padding according to the current clip and wrap modes. If the StyledTextLayout has changes calling this method will trigger internal recalculations.
 	ci::ivec2 getTextSize();

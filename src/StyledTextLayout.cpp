@@ -373,7 +373,7 @@ bool StyledTextLayout::getLeadingDisabled() const { return mLeadingDisabled; }
 void StyledTextLayout::setLeadingDisabled(const bool value, bool updateExistingText) { mLeadingDisabled = value; invalidate(); }
 
 ci::vec2 StyledTextLayout::getMaxSize() const { return mMaxSize; }
-void StyledTextLayout::setMaxSize(const ci::vec2 value) { mMaxSize = value; invalidate(); }
+void StyledTextLayout::setMaxSize(const ci::vec2& value) { mMaxSize = value; invalidate(); }
 
 float StyledTextLayout::getMaxWidth() const { return mMaxSize.x; }
 void StyledTextLayout::setMaxWidth(const float value) { mMaxSize.x = value; invalidate(); }
@@ -606,18 +606,18 @@ void StyledTextLayout::validateSize() {
 
 		// Determine the extents for all the lines and the result surface
 		float totalHeight = mPaddingTop + mPaddingBottom;
-		float totalWidth = 0.0f;
+		float totalWidth = mPaddingLeft + mPaddingRight;
 
 		for (auto line : mLines) {
-			totalWidth = std::max(totalWidth, line->getSize().x + mPaddingLeft + mPaddingRight);
-			totalHeight = std::max(totalHeight, totalHeight + line->getSize().y + line->getLeadingOffset());
+			totalWidth = max(totalWidth, line->getSize().x + mPaddingLeft + mPaddingRight);
+			totalHeight = max(totalHeight, totalHeight + line->getSize().y + line->getLeadingOffset());
 		}
 
 		if (mMaxSize.x >= 0.0f) {
-			if (!mSizeTrimmingEnabled) {
+			if (!mSizeTrimmingEnabled && mClipMode != NoClip) {
 				totalWidth = (int)ci::math<float>::ceil(mMaxSize.x);
 			} else if (mClipMode == Clip) {
-				totalWidth = std::min(totalWidth, mMaxSize.x);
+				totalWidth = min(totalWidth, mMaxSize.x);
 			}
 		}
 
@@ -635,7 +635,7 @@ void StyledTextLayout::validateSize() {
 	}
 
 	if (mMaxSize.y >= 0 || mPaddingTop + mPaddingBottom <= mMaxSize.y) {
-		if (!mSizeTrimmingEnabled) {
+		if (!mSizeTrimmingEnabled && mClipMode != NoClip) {
 			mTextSize.y = (int)ci::math<float>::ceil(mMaxSize.y);
 		} else if (mClipMode == Clip) {
 			mTextSize.y = (int)ci::math<float>::ceil(std::min((float)mTextSize.y, mMaxSize.y));
