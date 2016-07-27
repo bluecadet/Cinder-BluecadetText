@@ -145,9 +145,17 @@ public:
 	ClipMode getClipMode() const;
 	void setClipMode(const ClipMode value);
 
+	// Combines max width and height. Defaults to (-1, -1), which disables max width and height, allowing both to expand infinitely.
+	ci::vec2 getMaxSize() const;
+	void setMaxSize(const ci::vec2 size);
+
 	//! Max width to use in combination with layout Clip and WordWrap. Defaults to -1.0. Widths smaller than 0 disable word wrapping and clipping.
 	float getMaxWidth() const;
 	void setMaxWidth(const float value);
+
+	//! Max height to use in combination with layout Clip. If Clip is enabled and maxHeight is > 0, then text will be clipped at maxHeight.
+	float getMaxHeight() const;
+	void setMaxHeight(const float value);
 
 	//! Returns the text size including padding according to the current clip and wrap modes. If the StyledTextLayout has changes calling this method will trigger internal recalculations.
 	ci::ivec2 getTextSize();
@@ -158,6 +166,10 @@ public:
 	//! Returns the height of text including padding and according to the current clip mode. If the StyledTextLayout has changes calling this method will trigger internal recalculations.
 	int getTextHeight();
 
+
+	//! Will trim text size if it's smaller than maxSize when enabled. Default is false.
+	bool getSizeTrimmingEnabled() const;
+	void setSizeTrimmingEnabled(const bool value);
 
 
 	//! Apples padding to text. Positive padding adds space towards the inside, negative padding towards the outside. Works similar to css box-sizing: border-box.
@@ -257,12 +269,13 @@ protected:
 
 	LayoutMode	mLayoutMode;
 	ClipMode	mClipMode;
+	bool		mSizeTrimmingEnabled;
 
 	// Styling properties
 	bool		mLeadingDisabled;
 	int			mParseOptions;
 
-	float		mMaxWidth;
+	ci::vec2	mMaxSize;
 	float		mPaddingTop;
 	float		mPaddingRight;
 	float		mPaddingBottom;

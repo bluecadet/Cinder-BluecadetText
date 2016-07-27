@@ -259,10 +259,11 @@ StyledTextLayout::StyledTextLayout() :
 	mPaddingLeft(0.0f),
 	mLayoutMode(WordWrap),
 	mClipMode(Clip),
-	mMaxWidth(-1.0f),
+	mMaxSize(-1.0f, -1.0f),
 	mLeadingDisabled(true),
 	mHasInvalidSize(false),
 	mHasInvalidLayout(false),
+	mSizeTrimmingEnabled(false),
 	mTextSize(0, 0)
 {
 	// force any globals we need to be initialized, particularly GDI+ on Windows
@@ -371,8 +372,14 @@ void StyledTextLayout::setLeadingOffset(float leadingOffset, bool updateExisting
 bool StyledTextLayout::getLeadingDisabled() const { return mLeadingDisabled; }
 void StyledTextLayout::setLeadingDisabled(const bool value, bool updateExistingText) { mLeadingDisabled = value; invalidate(); }
 
-float StyledTextLayout::getMaxWidth() const { return mMaxWidth; }
-void StyledTextLayout::setMaxWidth(const float value) { mMaxWidth = value; invalidate(); }
+ci::vec2 StyledTextLayout::getMaxSize() const { return mMaxSize; }
+void StyledTextLayout::setMaxSize(const ci::vec2 value) { mMaxSize = value; invalidate(); }
+
+float StyledTextLayout::getMaxWidth() const { return mMaxSize.x; }
+void StyledTextLayout::setMaxWidth(const float value) { mMaxSize.x = value; invalidate(); }
+
+float StyledTextLayout::getMaxHeight() const { return mMaxSize.y; }
+void StyledTextLayout::setMaxHeight(const float value) { mMaxSize.y = value; invalidate(); }
 
 void StyledTextLayout::setPadding(const float vertical, const float horizontal) { mPaddingTop = mPaddingBottom = vertical; mPaddingRight = mPaddingLeft = horizontal; invalidate(); }
 void StyledTextLayout::setPadding(const float top, const float right, const float bottom, const float left) { mPaddingTop = top; mPaddingRight = right;  mPaddingBottom = bottom; mPaddingLeft = left; invalidate(); };
@@ -388,6 +395,9 @@ float StyledTextLayout::getPaddingLeft() const { return mPaddingLeft; };
 int StyledTextLayout::getTextWidth() { validateSize(); return mTextSize.x; }
 int StyledTextLayout::getTextHeight() { validateSize(); return mTextSize.y; }
 ci::ivec2 StyledTextLayout::getTextSize() { validateSize(); return mTextSize; }
+
+bool StyledTextLayout::getSizeTrimmingEnabled() const { return mSizeTrimmingEnabled; }
+void StyledTextLayout::setSizeTrimmingEnabled(const bool value) { mSizeTrimmingEnabled = value; invalidate(false, true); }
 
 
 //==================================================
@@ -438,7 +448,7 @@ void StyledTextLayout::appendSegment(const StyledText& segment) {
 	static const CharType cWhitespace = L' ';
 	static const CharType cTab = L'\t';
 
-	const float maxWidth = mMaxWidth - mPaddingLeft - mPaddingRight;
+	const float maxWidth = mMaxSize.x - mPaddingLeft - mPaddingRight;
 	bool shouldAutoWrap = mLayoutMode == LayoutMode::WordWrap;
 	bool isWrapDisabled = mLayoutMode == LayoutMode::SingleLine;
 	const bool shouldStripBreaks = mLayoutMode == LayoutMode::StripBreaks;
@@ -538,7 +548,6 @@ ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied)
 	bitmapSize.y += 1;
 
 	// prep our GDI and GDI+ resources
-	//HDC dc = TextManager::instance()->getDc();
 	result = ci::Surface8u(bitmapSize.x, bitmapSize.y, useAlpha, ci::SurfaceConstraintsGdiPlus());
 	result.setPremultiplied(premultiplied);
 
@@ -550,10 +559,8 @@ ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied)
 	// walk the lines and getSurface them, advancing our Y offset along the way
 	float currentY = mPaddingTop;
 	for (auto& line : mLines) {
-		//currentY += line->getLeadingOffset() + line->getAscent();
 		currentY += line->getLeadingOffset() + line->getLeading();
 		line->render(offscreenGraphics, currentY, mPaddingLeft, mPaddingRight, (float)bitmapSize.x);
-		//currentY += line->getDescent() + line->getLeading();
 		currentY += line->getAscent() + line->getDescent();
 	}
 
@@ -595,7 +602,7 @@ void StyledTextLayout::validateSize() {
 	mTextSize = ci::ivec2(0, 0);
 
 	// Make sure padding doesn't exceed max width
-	if (mMaxWidth < 0.0f || mPaddingLeft + mPaddingRight <= mMaxWidth) {
+	if (mMaxSize.x < 0.0f || mPaddingLeft + mPaddingRight <= mMaxSize.x) {
 
 		// Determine the extents for all the lines and the result surface
 		float totalHeight = mPaddingTop + mPaddingBottom;
@@ -606,11 +613,15 @@ void StyledTextLayout::validateSize() {
 			totalHeight = std::max(totalHeight, totalHeight + line->getSize().y + line->getLeadingOffset());
 		}
 
-		if (mMaxWidth >= 0.0f && mClipMode == Clip) {
-			totalWidth = std::min(totalWidth, mMaxWidth);
+		if (mMaxSize.x >= 0.0f) {
+			if (!mSizeTrimmingEnabled) {
+				totalWidth = (int)ci::math<float>::ceil(mMaxSize.x);
+			} else if (mClipMode == Clip) {
+				totalWidth = std::min(totalWidth, mMaxSize.x);
+			}
 		}
 
-		// Dound up from the floating point sizes to get the number of pixels we'll need
+		// round up from the floating point sizes to get the number of pixels we'll need
 		int pixelWidth = (int)ci::math<float>::ceil(totalWidth);
 		int pixelHeight = (int)ci::math<float>::ceil(totalHeight);
 
@@ -621,6 +632,14 @@ void StyledTextLayout::validateSize() {
 		}
 
 		mTextSize = ci::ivec2(pixelWidth, pixelHeight);
+	}
+
+	if (mMaxSize.y >= 0 || mPaddingTop + mPaddingBottom <= mMaxSize.y) {
+		if (!mSizeTrimmingEnabled) {
+			mTextSize.y = (int)ci::math<float>::ceil(mMaxSize.y);
+		} else if (mClipMode == Clip) {
+			mTextSize.y = (int)ci::math<float>::ceil(std::min((float)mTextSize.y, mMaxSize.y));
+		}
 	}
 
 	mHasInvalidSize = false;
