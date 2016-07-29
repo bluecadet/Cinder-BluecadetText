@@ -615,7 +615,7 @@ void StyledTextLayout::validateSize() {
 
 		if (mMaxSize.x >= 0.0f) {
 			if (!mSizeTrimmingEnabled && mClipMode != NoClip) {
-				totalWidth = (int)ci::math<float>::ceil(mMaxSize.x);
+				totalWidth = mMaxSize.x;
 			} else if (mClipMode == Clip) {
 				totalWidth = min(totalWidth, mMaxSize.x);
 			}
