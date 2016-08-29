@@ -59,7 +59,7 @@ std::vector<StyledText> StyledTextParser::parse(const StringType& str, Style bas
 			}
 			else {
 				// Escape tags
-				if (tag == L"<br/>" || tag == L"<br>") {
+				if (tag == L"<br />" || tag == L"<br/>" || tag == L"<br>") {
 					if (options & STRIP_BREAK_TAGS) continue;
 					token = L"\n";
 				}
