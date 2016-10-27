@@ -169,7 +169,7 @@ inline ci::ColorA getColorFromString(std::string colorStr) {
 	if (colorStr.empty()) return ci::Color::black();
 	if (colorStr.substr(0, 1) == "#") colorStr = colorStr.substr(1, colorStr.length() - 1);
 	if (colorStr.substr(0, 2) != "0x") colorStr = "0x" + colorStr;
-	uint32_t c = std::stoul(colorStr, nullptr, 16);
+	uint32_t c = (uint32_t)std::stoul(colorStr, nullptr, 16);
 	if (colorStr.length() <= 8) {
 		return getColorFromRGB(c);
 	}
@@ -183,8 +183,8 @@ inline ci::ColorA getColorFromString(std::string colorStr) {
 //! Splits a string into tokens based on delimiters. All delimiters are returned as tokens themselves.
 template <typename StringType, typename ContainerType>
 inline void tokenize(const StringType& str, ContainerType& tokenContainer, const StringType& delimiters) {
-	typedef StringType::value_type CharType;
-	typedef boost::tokenizer<boost::char_separator<wchar_t>, StringType::const_iterator, StringType> tokenizer;
+	typedef typename StringType::value_type CharType;
+	typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
 	boost::char_separator<wchar_t> sep{ StringType().c_str(), delimiters.c_str() };
 	tokenizer tok{ str, sep };
 	for (const auto &t : tok) {
@@ -196,8 +196,8 @@ inline void tokenize(const StringType& str, ContainerType& tokenContainer, const
 template <typename StringType>
 inline std::list<StringType> tokenize(const StringType& str, const StringType& delimiters) {
 	std::list<StringType> tokenContainer;
-	typedef StringType::value_type CharType;
-	typedef boost::tokenizer<boost::char_separator<wchar_t>, StringType::const_iterator, StringType> tokenizer;
+	typedef typename StringType::value_type CharType;
+	typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
 	boost::char_separator<wchar_t> sep{ StringType().c_str(), delimiters.c_str() };
 	tokenizer tok{ str, sep };
 	for (const auto &t : tok) {

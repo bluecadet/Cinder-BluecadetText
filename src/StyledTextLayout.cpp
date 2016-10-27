@@ -31,10 +31,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "cinder/Font.h"
 #include "cinder/Vector.h"
 
-#if defined(CINDER_MSW)
+#if !defined(CINDER_MSW)
+
+#warning "StyledTextLayout: Warning: This class is only supported on Windows 7+"
+
 #else
-#error "StyledTextLayout: Error: This class is only supported on Windows 7+"
-#endif
 
 #include <Windows.h>
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -658,3 +659,5 @@ void StyledTextLayout::modifyStyles(bool updateExistingText, std::function<void(
 
 }
 }
+
+#endif
