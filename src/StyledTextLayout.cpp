@@ -269,6 +269,7 @@ StyledTextLayout::StyledTextLayout() :
 {
 	// force any globals we need to be initialized, particularly GDI+ on Windows
 	TextManager::instance();
+	mCurrentStyle = StyleManager::getInstance()->getDefaultStyle();
 	mParseOptions = StyledTextParser::getInstance()->getDefaultOptions();
 }
 
