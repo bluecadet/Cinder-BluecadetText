@@ -193,32 +193,32 @@ public:
 	Style getCurrentStyle() const;
 
 	//! Sets the currently active color. Implicit opqaue alpha.
-	void setTextColor(const ci::Color& color, bool updateExistingText = false);
+	void setTextColor(const ci::Color& color, bool updateExistingText = true);
 
 	//! Sets the currently active color and alpha.
-	void setTextColor(const ci::ColorA& color, bool updateExistingText = false);
+	void setTextColor(const ci::ColorA& color, bool updateExistingText = true);
 
 	//! Sets an offset relative to the default leading (the vertical space between lines)  for any future text.
-	void setLeadingOffset(float leadingOffset, bool updateExistingText = false);
+	void setLeadingOffset(float leadingOffset, bool updateExistingText = true);
 
 	//! Will ignore any font-defined leading when set to true. Default is true.
 	bool getLeadingDisabled() const;
-	void setLeadingDisabled(const bool value, bool updateExistingText = false);
+	void setLeadingDisabled(const bool value, bool updateExistingText = true);
 
 	//! Sets the justification for any future text
-	void setTextAlign(const TextAlign value, bool updateExistingText = false);
+	void setTextAlign(const TextAlign value, bool updateExistingText = true);
 
 	//! Sets the font family for any future text
-	void setFontFamily(const std::string& fontFamily, bool updateExistingText = false);
+	void setFontFamily(const std::string& fontFamily, bool updateExistingText = true);
 
 	//! Sets the font size for any future text
-	void setFontSize(const float fontSize, bool updateExistingText = false);
+	void setFontSize(const float fontSize, bool updateExistingText = true);
 
 	//! Sets the font style for any future text
-	void setFontStyle(const FontStyle fontStyle, bool updateExistingText = false);
+	void setFontStyle(const FontStyle fontStyle, bool updateExistingText = true);
 
 	//! Sets the font weight for any future text
-	void setFontWeight(const FontWeight fontWeight, bool updateExistingText = false);
+	void setFontWeight(const FontWeight fontWeight, bool updateExistingText = true);
 
 
 
