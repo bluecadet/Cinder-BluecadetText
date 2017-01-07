@@ -88,9 +88,9 @@ public:
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Parses supported style tags.
 	void appendText(const std::string& text);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void appendText(const std::string& text, const std::string& styleName);
+	void appendText(const std::string& text, const std::string& styleName, bool saveAsCurrentStyle = false);
 	//! Appends text to any existing text and and sets the current style. Parses supported style tags.
-	void appendText(const std::string& text, const Style& style);
+	void appendText(const std::string& text, const Style& style, bool saveAsCurrentStyle = false);
 
 	//! Replaces the current text with plain text and keeps the current style. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
 	void setPlainText(const std::string& text);
@@ -102,9 +102,9 @@ public:
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
 	void appendPlainText(const std::string& text);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void appendPlainText(const std::string& text, const std::string& styleName);
+	void appendPlainText(const std::string& text, const std::string& styleName, bool saveAsCurrentStyle = false);
 	//! Appends text to any existing text and and sets the current style. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void appendPlainText(const std::string& text, const Style& style);
+	void appendPlainText(const std::string& text, const Style& style, bool saveAsCurrentStyle = false);
 
 
 	//! Replaces the current text and keeps the current style. Parses supported style tags.
@@ -117,9 +117,9 @@ public:
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Parses supported style tags.
 	void appendText(const std::wstring& text);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void appendText(const std::wstring& text, const std::string& styleName);
+	void appendText(const std::wstring& text, const std::string& styleName, bool saveAsCurrentStyle = false);
 	//! Appends text to any existing text and and sets the current style. Parses supported style tags.
-	void appendText(const std::wstring& text, const Style& style);
+	void appendText(const std::wstring& text, const Style& style, bool saveAsCurrentStyle = false);
 
 	//! Replaces the current text with plain text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
 	void setPlainText(const std::wstring& text);
@@ -131,9 +131,9 @@ public:
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
 	void appendPlainText(const std::wstring& text);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void appendPlainText(const std::wstring& text, const std::string& styleName);
+	void appendPlainText(const std::wstring& text, const std::string& styleName, bool saveAsCurrentStyle = false);
 	//! Appends text to any existing text and and sets the current style. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void appendPlainText(const std::wstring& text, const Style& style);
+	void appendPlainText(const std::wstring& text, const Style& style, bool saveAsCurrentStyle = false);
 
 
 
@@ -172,7 +172,7 @@ public:
 	void setSizeTrimmingEnabled(const bool value);
 
 
-	//! Apples padding to text. Positive padding adds space towards the inside, negative padding towards the outside. Works similar to css box-sizing: border-box.
+	//! Applies padding to text. Positive padding adds space towards the inside, negative padding towards the outside. Works similar to css box-sizing: border-box.
 	void setPadding(const float top, const float right, const float bottom, const float left);
 	void setPadding(const float vertical, const float horizontal);
 	void setPaddingTop(const float padding);
