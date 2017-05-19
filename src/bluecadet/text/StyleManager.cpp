@@ -77,12 +77,20 @@ void StyleManager::parseStyles(const ci::JsonTree& node, const Style& baseStyle,
 
 		const std::string& path = node.getPath();
 
-		// Save all styles except for root element (root only defines base style)
-		if (path != basePath && path != "" && node.hasParent()) {
+		// root style is a nameless, top-level style
+		const bool isRoot = path == basePath || path.empty() || !node.hasParent();
+
+		if (isRoot) {
+			// re-define default style from root style
+			mDefaultStyle = style;
+
+		} else if(!path.empty()) {
+			// save style to style map
 			const string& styleKey = getStrippedPath(path, basePath + ".");
 			mStyles[styleKey] = style;
 		}
 
+		// parse child styles while inheriting from the current style
 		for (auto& child : node.getChildren()) {
 			parseStyles(child, style);
 		}

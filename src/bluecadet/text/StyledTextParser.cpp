@@ -40,7 +40,6 @@ std::vector<StyledText> StyledTextParser::parse(const StringType& str, Style bas
 
 			if (tag == L"<i>" || tag == L"<em>") {
 				// Italic
-				FontStyle targetFontStyle = FontStyle::Italic;
 				const bool shouldInvert = (options & INVERT_NESTED_ITALICS) && (styles.top().mFontStyle == FontStyle::Italic);
 				Style style = Style(styles.top()).fontStyle(shouldInvert ? FontStyle::Normal : FontStyle::Italic);
 				styles.push(style);
@@ -59,7 +58,7 @@ std::vector<StyledText> StyledTextParser::parse(const StringType& str, Style bas
 			}
 			else {
 				// Escape tags
-				if (tag == L"<br/>" || tag == L"<br>") {
+				if (tag == L"<br />" || tag == L"<br/>" || tag == L"<br>") {
 					if (options & STRIP_BREAK_TAGS) continue;
 					token = L"\n";
 				}

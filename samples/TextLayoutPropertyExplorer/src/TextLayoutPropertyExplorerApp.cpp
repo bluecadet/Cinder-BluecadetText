@@ -4,10 +4,10 @@
 #include "cinder/Utilities.h"
 #include "cinder/params/Params.h"
 
-#include "StyleManager.h"
-#include "FontManager.h"
-#include "StyledTextLayout.h"
-#include "StyledTextParser.h"
+#include "bluecadet/text/StyleManager.h"
+#include "bluecadet/text/FontManager.h"
+#include "bluecadet/text/StyledTextLayout.h"
+#include "bluecadet/text/StyledTextParser.h"
 
 using namespace ci;
 using namespace ci::app;

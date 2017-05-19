@@ -1,4 +1,4 @@
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
@@ -21,6 +21,12 @@
     <Filter Include="Blocks\BluecadetText\src">
       <UniqueIdentifier>{0B736EDF-8363-4936-A0AB-EF843BC6886E}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Blocks\BluecadetText\src\bluecadet">
+      <UniqueIdentifier>{369c015d-74ea-490f-a6cf-b20d17847e66}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\BluecadetText\src\bluecadet\text">
+      <UniqueIdentifier>{cd58b76c-0526-459c-957d-bc44ced9d48e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\src\TextLayoutPropertyExplorerApp.cpp">
@@ -32,37 +38,37 @@
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClCompile Include="..\..\..\src\FontManager.cpp">
-      <Filter>Blocks\BluecadetText\src</Filter>
+    <ClCompile Include="..\..\..\src\bluecadet\text\FontManager.cpp">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\StyledTextLayout.cpp">
-      <Filter>Blocks\BluecadetText\src</Filter>
+    <ClCompile Include="..\..\..\src\bluecadet\text\StyledTextLayout.cpp">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\StyledTextParser.cpp">
-      <Filter>Blocks\BluecadetText\src</Filter>
+    <ClCompile Include="..\..\..\src\bluecadet\text\StyledTextParser.cpp">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\src\StyleManager.cpp">
-      <Filter>Blocks\BluecadetText\src</Filter>
+    <ClCompile Include="..\..\..\src\bluecadet\text\StyleManager.cpp">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
     </ClCompile>
-    <ClInclude Include="..\..\..\src\FontManager.h">
-      <Filter>Blocks\BluecadetText\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\StyledTextLayout.h">
-      <Filter>Blocks\BluecadetText\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\StyledTextParser.h">
-      <Filter>Blocks\BluecadetText\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\StyleManager.h">
-      <Filter>Blocks\BluecadetText\src</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\..\src\Text.h">
-      <Filter>Blocks\BluecadetText\src</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\Resources.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\bluecadet\text\FontManager.h">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\bluecadet\text\StyledTextLayout.h">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\bluecadet\text\StyledTextParser.h">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\bluecadet\text\StyleManager.h">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\bluecadet\text\Text.h">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

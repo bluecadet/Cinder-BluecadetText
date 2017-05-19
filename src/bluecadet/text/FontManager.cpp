@@ -145,18 +145,31 @@ ci::Font& FontManager::getCachedFontByPath(std::string path, float size) {
 	auto fontIt = sizeMap.find(size);
 
 	if (fontIt == sizeMap.end()) {
-		auto dataSource = loadFile(path);
+		ci::DataSourceRef dataSource = nullptr;
 
-		if (!dataSource) {
-			if (mLogLevel >= LogLevel::Error) cout << "FontManager: Error: Can't load font at '" << path << "'; Returning default font '" << mDefaultName << "'" << endl;
+		// try loading font file
+		try {
+			dataSource = loadFile(path);
+		} catch (Exception e) {
+			if (mLogLevel >= LogLevel::Error) cout << "FontManager: Error: Can't load font file at '" << path << "'; Returning default font '" << mDefaultName << "'" << endl;
 			return getCachedFontByName(mDefaultName, size);
 		}
 
-		sizeMap[size] = ci::Font(dataSource, size);
+		// try creating font
+		try {
+			sizeMap[size] = ci::Font(dataSource, size);
+
+		} catch (Exception e) {
+			if (mLogLevel >= LogLevel::Error) cout << "FontManager: Error: Can't create font from file at '" << path << "'; Returning default font '" << mDefaultName << "'" << endl;
+			return getCachedFontByName(mDefaultName, size);
+		}
+
 		fontIt = sizeMap.find(size);
+
 	}
 
 	return fontIt->second;
+
 }
 
 ci::Font& FontManager::getCachedFontByName(std::string name, float size) {
