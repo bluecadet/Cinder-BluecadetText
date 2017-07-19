@@ -6,11 +6,11 @@ Built around the need to have multi-line, auto-wrapping text with inline styles,
 
 The core text rendering code is based on Cinder's own [`TextLayout`](https://libcinder.org/docs/classcinder_1_1_text_layout.html), but expands on layout, styling and caching functionality.
 
-Built for and tested with [Cinder v0.9.1](https://github.com/cinder/Cinder/tree/v0.9.1) on Windows 7, 8.1 and 10. See [notes below](#Notes) for setup instructions.
+Built for and tested with [Cinder v0.9.1](https://github.com/cinder/Cinder/tree/v0.9.1) on Windows 7, 8.1 and 10. See [notes below](#notes) for setup instructions.
 
 *Windows only! StyledTextLayout uses Windows-only GDI+ and currently has no Linux/Mac support.*
 
-This block is compatible with and used by [Cinder-BluecadetViews](/bluecadet/Cinder-BluecadetViews), which implements automatic rendering of text to textures in a scene-graph.
+This block is compatible with and used by [Cinder-BluecadetViews](https://github.com/bluecadet/Cinder-BluecadetViews), which implements automatic rendering of text to textures in a scene-graph.
 
 ![](docs/media/class-hierarchy.png)
 
