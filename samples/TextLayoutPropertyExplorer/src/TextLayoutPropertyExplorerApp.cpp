@@ -84,6 +84,8 @@ void TextLayoutPropertyExplorerApp::setup()
 	mTextLayout->setPadding(10.f, 10.f, 10.f, 10.f);
 
 	// Sets the text of the StyledTextLayout instance and renders it to a texture
+	mTextLayout->setText("This is a test title", "test.title");
+	mTextLayout->appendText("<br>" + mLoremIpsum, "test.body");
 	updateText();
 
 	// Configure debug parameters
@@ -109,6 +111,9 @@ void TextLayoutPropertyExplorerApp::setup()
 	mParams->addParam<float>("Padding Bottom", [&](float v) { mTextLayout->setPaddingBottom(v); }, [&] { return mTextLayout->getPaddingBottom(); });
 	mParams->addParam<float>("Padding Left", [&](float v) { mTextLayout->setPaddingLeft(v); }, [&] { return mTextLayout->getPaddingLeft(); });
 	mParams->addSeparator();
+	mParams->addParam<bool>("Leading Disabled", [&](bool v) { mTextLayout->setLeadingDisabled(v); }, [&] { return mTextLayout->getLeadingDisabled(); });
+	mParams->addParam<float>("Leading Offset", [&](float v) { mTextLayout->setLeadingOffset(v); }, [&] { return mTextLayout->getCurrentStyle().mLeadingOffset; }).step(1);
+	mParams->addSeparator();
 	mParams->addParam("Oscillate", &mOscillate);
 	mParams->addParam("Force Updates", &mForceUpdates);
 }
@@ -124,8 +129,8 @@ void TextLayoutPropertyExplorerApp::loadText() {
 }
 
 void TextLayoutPropertyExplorerApp::updateText() {
-	mTextLayout->setText("This is a test title", "test.title");
-	mTextLayout->appendText("<br>" + mLoremIpsum, "test.body");
+	/*mTextLayout->setText("This is a test title", "test.title");
+	mTextLayout->appendText("<br>" + mLoremIpsum, "test.body");*/
 
 	mTextSurface = mTextLayout->renderToSurface();
 	mTextTexture = gl::Texture::create(mTextSurface);
