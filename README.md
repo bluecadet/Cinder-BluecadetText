@@ -68,7 +68,7 @@ textLayout->setText("Jaded zombies acted quaintly but kept driving their oxen fo
 
 // ...
 
-auto surface = mTextLayout->renderToSurface();
+auto surface = textLayout->renderToSurface();
 auto texture = gl::Texture::create(surface);
 gl::draw(texture);
 ```
@@ -121,12 +121,11 @@ FontManager::getInstance()->setup(getAssetPath("Fonts/fonts.json"));
 
 auto textLayout = StyledTextLayoutRef(new StyledTextLayout());
 textLayout->setFontFamily("OpenSans");
-textLayout->setText("Jaded <b><i>zombies</i> acted<br/>quaintly</b> but \
-kept driving <i>their oxen forward</i>.");
+textLayout->setText("Jaded <b><i>zombies</i> acted<br/>quaintly</b> but kept driving <i>their oxen</i>.");
 
 // ...
 
-auto surface = mTextLayout->renderToSurface();
+auto surface = textLayout->renderToSurface();
 auto texture = gl::Texture::create(surface);
 gl::draw(texture);
 ```
