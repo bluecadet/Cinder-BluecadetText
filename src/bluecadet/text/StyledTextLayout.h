@@ -175,6 +175,7 @@ public:
 	//! Applies padding to text. Positive padding adds space towards the inside, negative padding towards the outside. Works similar to css box-sizing: border-box.
 	void setPadding(const float top, const float right, const float bottom, const float left);
 	void setPadding(const float vertical, const float horizontal);
+	void setPadding(const float padding);
 	void setPaddingTop(const float padding);
 	void setPaddingRight(const float padding);
 	void setPaddingBottom(const float padding);
@@ -207,6 +208,9 @@ public:
 
 	//! Sets the justification for any future text
 	void setTextAlign(const TextAlign value, bool updateExistingText = true);
+
+	//! Sets the type of text transformation (e.g. convert to upper- or lower-case)
+	void setTextTransform(const TextTransform value, bool updateExistingText = true);
 
 	//! Sets the font family for any future text
 	void setFontFamily(const std::string& fontFamily, bool updateExistingText = true);

@@ -368,7 +368,10 @@ void StyledTextLayout::setFontWeight(const FontWeight fontWeight, bool updateExi
 void StyledTextLayout::setTextColor(const ci::Color &color, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mColor = color; }); }
 void StyledTextLayout::setTextColor(const ci::ColorA &color, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mColor = color; }); }
 
-void StyledTextLayout::setTextAlign(const TextAlign textAlign, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mTextAlign = textAlign; }); invalidate(); }
+void StyledTextLayout::setTextAlign(const TextAlign value, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mTextAlign = value; }); invalidate(); }
+
+void StyledTextLayout::setTextTransform(const TextTransform value, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mTextTransform = value; }); invalidate(); }
+
 void StyledTextLayout::setLeadingOffset(float leadingOffset, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mLeadingOffset = leadingOffset; }); invalidate(); }
 
 bool StyledTextLayout::getLeadingDisabled() const { return mLeadingDisabled; }
@@ -384,6 +387,7 @@ float StyledTextLayout::getMaxHeight() const { return mMaxSize.y; }
 void StyledTextLayout::setMaxHeight(const float value) { mMaxSize.y = value; invalidate(); }
 
 void StyledTextLayout::setPadding(const float vertical, const float horizontal) { mPaddingTop = mPaddingBottom = vertical; mPaddingRight = mPaddingLeft = horizontal; invalidate(); }
+void StyledTextLayout::setPadding(const float padding) { mPaddingTop = mPaddingRight = mPaddingBottom = mPaddingLeft = padding; invalidate(); }
 void StyledTextLayout::setPadding(const float top, const float right, const float bottom, const float left) { mPaddingTop = top; mPaddingRight = right;  mPaddingBottom = bottom; mPaddingLeft = left; invalidate(); };
 void StyledTextLayout::setPaddingTop(const float padding) { mPaddingTop = padding; invalidate(); };
 void StyledTextLayout::setPaddingRight(const float padding) { mPaddingRight = padding; invalidate(); };
