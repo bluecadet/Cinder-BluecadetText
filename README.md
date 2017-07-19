@@ -42,10 +42,13 @@ This block is compatible with and used by [Cinder-BluecadetViews](https://github
 
 * Parses `string` and `wstring`
 * Outputs `StyledText` pairs of `string` (or `wstring`) combined with `Style`s
+* Supports nested styles and (and nested/inverted italics)
 
 ## Getting Started
 
 ### Basic StyledTextLayout Usage
+
+`StyledTextLayout` can be used to render simple text out of the box. In order to parse styled text and bold/italic tags, styles and fonts for those font-weights/font-styles have to be defined (see following sections).
 
 ```c++
 #include "cinder/app/App.h"
@@ -112,16 +115,54 @@ CINDER_APP(BasicSampleApp,
 })
 ```
 
-### Parsing Styled Text
+### Rendering Font Weights and Styles
 
-```c++
-// TODO
+In order to display custom font weights and styles, you need to define a `json` file that points to local font files for each weight and style. Here's an example file:
+
+```json
+{
+    "fonts": {
+        "OpenSans": {
+            "300":{
+                "normal": "OpenSans/OpenSans-Light.ttf",
+                "italic": "OpenSans/OpenSans-LightItalic.ttf"
+            },
+            "400":{
+                "normal": "OpenSans/OpenSans-Regular.ttf",
+                "italic": "OpenSans/OpenSans-Italic.ttf"
+            },
+            "500":{
+                "normal": "OpenSans/OpenSans-Semibold.ttf",
+                "italic": "OpenSans/OpenSans-SemiboldItalic.ttf"
+            },
+            "600":{
+                "normal": "OpenSans/OpenSans-Bold.ttf",
+                "italic": "OpenSans/OpenSans-BoldItalic.ttf"
+            },
+            "700": {
+                "normal": "OpenSans/OpenSans-ExtraBold.ttf",
+                "italic": "OpenSans/OpenSans-ExtraBoldItalic.ttf"
+            }
+        }
+    }
+}
 ```
 
-### Managing and Using Fonts
+And initializing the fonts is a single line using the `FontManager`. Instances of `StyledTextLayout` will use the font manager to load the appropriate fonts for a certain family, weight and style and the `FontManager` will determine which font is returned based on the json.
 
 ```c++
-// TODO
+
+#include "bluecadet/text/FontManager.h"
+
+// ...
+
+FontManager::getInstance()->setup(getAssetPath("Fonts/fonts.json"));
+
+// ...
+mTextLayout = StyledTextLayoutRef(new StyledTextLayout());
+mTextLayout->setFontFamily("OpenSans"); // Use a font from your fonts.json
+// ... Configure other properties as needed ...
+mTextLayout->setText("Jaded <b><i>zombies</i> acted<br/>quaintly</b> but kept driving <i>their oxen forward</i>.");
 ```
 
 ### Managing and Using Styles
