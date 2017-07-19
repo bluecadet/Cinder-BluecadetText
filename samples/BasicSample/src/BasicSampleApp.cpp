@@ -56,7 +56,8 @@ void BasicSampleApp::setup() {
 	mTextLayout->setText("Jaded zombies acted quaintly but kept driving their oxen forward.");
 
 	// And you should be able to render
-	mTextLayout->setText("Jaded <b><i>zombies</i> acted<br/>quaintly</b> but kept driving <i>their <i>oxen</i> forward</i>.");
+	mTextLayout->setText("Jaded <b><i>zombies</i> acted<br/>quaintly</b> but \
+kept driving <i>their oxen forward</i>.");
 }
 
 void BasicSampleApp::update() {

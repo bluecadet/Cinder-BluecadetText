@@ -51,68 +51,26 @@ This block is compatible with and used by [Cinder-BluecadetViews](https://github
 `StyledTextLayout` can be used to render simple text out of the box. In order to parse styled text and bold/italic tags, styles and fonts for those font-weights/font-styles have to be defined (see following sections).
 
 ```c++
-#include "cinder/app/App.h"
-#include "cinder/app/RendererGl.h"
-#include "cinder/gl/gl.h"
-
 #include "bluecadet/text/StyledTextLayout.h"
 
-using namespace ci;
-using namespace ci::app;
-using namespace std;
+// ...
 
-using namespace bluecadet::text;
+auto textLayout = StyledTextLayoutRef(new StyledTextLayout());
+textLayout->setClipMode(StyledTextLayout::ClipMode::NoClip);
+textLayout->setLayoutMode(StyledTextLayout::LayoutMode::WordWrap);
+textLayout->setPadding(16.f, 8.f, 16.f, 8.f);
+textLayout->setFontFamily("Arial");
+textLayout->setFontSize(48.f);
+textLayout->setTextColor(Color::white());
+textLayout->setTextAlign(TextAlign::Center);
+textLayout->setTextTransform(TextTransform::Capitalize);
+textLayout->setText("Jaded zombies acted quaintly but kept driving their oxen forward.");
 
-class BasicSampleApp : public App {
-public:
-    void setup() override;
-    void update() override;
-    void draw() override;
+// ...
 
-protected:
-    StyledTextLayoutRef mTextLayout;
-    gl::TextureRef mTextTexture;
-};
-
-void BasicSampleApp::setup() {
-    mTextLayout = StyledTextLayoutRef(new StyledTextLayout());
-    mTextLayout->setClipMode(StyledTextLayout::ClipMode::NoClip);
-    mTextLayout->setLayoutMode(StyledTextLayout::LayoutMode::WordWrap);
-    mTextLayout->setPadding(16.f, 8.f, 16.f, 8.f);
-    mTextLayout->setFontFamily("Arial");
-    mTextLayout->setFontSize(48.f);
-    mTextLayout->setTextColor(Color::white());
-    mTextLayout->setTextAlign(TextAlign::Center);
-    mTextLayout->setTextTransform(TextTransform::Capitalize);
-    mTextLayout->setText("Jaded zombies acted quaintly but kept driving their oxen forward.");
-}
-
-void BasicSampleApp::update() {
-    auto winMousePos = getMousePos() - getWindowPos();
-    mTextLayout->setMaxWidth(winMousePos.x);
-
-    if (mTextLayout->hasChanges()) {
-        auto surface = mTextLayout->renderToSurface();
-
-        if (mTextTexture && mTextTexture->getSize() == surface.getSize()) {
-            mTextTexture->update(surface);
-        } else {
-            mTextTexture = gl::Texture::create(surface);
-        }
-    }
-}
-
-void BasicSampleApp::draw() {
-    gl::clear();
-    gl::draw(mTextTexture);
-
-}
-
-CINDER_APP(BasicSampleApp,
-    RendererGl(RendererGl::Options().msaa(2)),
-    [&](ci::app::App::Settings *settings) {
-    settings->setWindowSize(900, 640);
-})
+auto surface = mTextLayout->renderToSurface();
+auto texture = gl::Texture::create(surface);
+gl::draw(texture);
 ```
 
 ### Rendering Font Weights and Styles
@@ -153,16 +111,24 @@ And initializing the fonts is a single line using the `FontManager`. Instances o
 ```c++
 
 #include "bluecadet/text/FontManager.h"
+#include "bluecadet/text/StyledTextLayout.h"
 
 // ...
 
 FontManager::getInstance()->setup(getAssetPath("Fonts/fonts.json"));
 
 // ...
-mTextLayout = StyledTextLayoutRef(new StyledTextLayout());
-mTextLayout->setFontFamily("OpenSans"); // Use a font from your fonts.json
-// ... Configure other properties as needed ...
-mTextLayout->setText("Jaded <b><i>zombies</i> acted<br/>quaintly</b> but kept driving <i>their oxen forward</i>.");
+
+auto textLayout = StyledTextLayoutRef(new StyledTextLayout());
+textLayout->setFontFamily("OpenSans");
+textLayout->setText("Jaded <b><i>zombies</i> acted<br/>quaintly</b> but \
+kept driving <i>their oxen forward</i>.");
+
+// ...
+
+auto surface = mTextLayout->renderToSurface();
+auto texture = gl::Texture::create(surface);
+gl::draw(texture);
 ```
 
 ### Managing and Using Styles
