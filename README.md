@@ -136,6 +136,18 @@ gl::draw(texture);
 // TODO
 ```
 
+## Known Issues
+
+* Leading and line-height calculations are currently tricky and limited by Windows' font APIs; Better line-height support is in the works
+* Convenience over performance: The main purpose of this block is convenience and flexibility with layouts. While certain optimizations like layout caching for existing runs and the ability to append text have been made, this block is not built for large amounts of text.
+
+## Future Wishlist
+
+* Allow for nested styles within one `StyledTextView` using XML markup (e.g. `"<body>And then he said: <quote>\"That's just nice\"</quote></body>"`; could also just use HTML tags)
+* Better line-height calculations and override using multiples of font-size
+* Actual CSS or SASS support (instead of JSON)
+* Inline style support (`<p style="color: #ff0000">not blue</p>`)
+
 ## Notes
 
 Version 1.1.0
