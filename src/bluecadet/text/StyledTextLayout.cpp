@@ -377,7 +377,7 @@ void StyledTextLayout::setLeadingOffset(float leadingOffset, bool updateExisting
 bool StyledTextLayout::getLeadingDisabled() const { return mLeadingDisabled; }
 void StyledTextLayout::setLeadingDisabled(const bool value, bool updateExistingText) { mLeadingDisabled = value; invalidate(); }
 
-ci::vec2 StyledTextLayout::getMaxSize() const { return mMaxSize; }
+const ci::vec2 & StyledTextLayout::getMaxSize() const { return mMaxSize; }
 void StyledTextLayout::setMaxSize(const ci::vec2& value) { mMaxSize = value; invalidate(); }
 
 float StyledTextLayout::getMaxWidth() const { return mMaxSize.x; }
