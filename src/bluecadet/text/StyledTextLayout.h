@@ -146,7 +146,7 @@ public:
 	void setClipMode(const ClipMode value);
 
 	// Combines max width and height. Defaults to (-1, -1), which disables max width and height, allowing both to expand infinitely.
-	virtual ci::vec2 getMaxSize() const;
+	virtual const ci::vec2 & getMaxSize() const;
 	virtual void setMaxSize(const ci::vec2& size);
 
 	//! Max width to use in combination with layout Clip and WordWrap. Defaults to -1.0. Widths smaller than 0 disable word wrapping and clipping.
@@ -175,6 +175,7 @@ public:
 	//! Applies padding to text. Positive padding adds space towards the inside, negative padding towards the outside. Works similar to css box-sizing: border-box.
 	void setPadding(const float top, const float right, const float bottom, const float left);
 	void setPadding(const float vertical, const float horizontal);
+	void setPadding(const float padding);
 	void setPaddingTop(const float padding);
 	void setPaddingRight(const float padding);
 	void setPaddingBottom(const float padding);
@@ -207,6 +208,9 @@ public:
 
 	//! Sets the justification for any future text
 	void setTextAlign(const TextAlign value, bool updateExistingText = true);
+
+	//! Sets the type of text transformation (e.g. convert to upper- or lower-case)
+	void setTextTransform(const TextTransform value, bool updateExistingText = true);
 
 	//! Sets the font family for any future text
 	void setFontFamily(const std::string& fontFamily, bool updateExistingText = true);
@@ -246,10 +250,10 @@ protected:
 	virtual inline void invalidate(const bool layout = true, const bool size = true);
 
 	//! Recalculates the current layout by clearing all content and re-adding it if the current layout is invalid.
-	inline void	validateLayout();
+	virtual inline void	validateLayout();
 
 	//! Recalculates the current size if the size is currently invalid.
-	inline void	validateSize();
+	virtual inline void	validateSize();
 
 	//! Helper to modify all styles of existing segments and the current style
 	void		modifyStyles(bool updateExistingText, std::function<void(Style& style)> fn);
