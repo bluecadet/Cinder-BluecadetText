@@ -44,6 +44,10 @@ This block is compatible with and used by [Cinder-BluecadetViews](https://github
 * Outputs `StyledText` pairs of `string` (or `wstring`) combined with `Style`s
 * Supports nested styles and (and nested/inverted italics)
 
+### Example
+
+![](docs/media/word-wrap-sample.gif)
+
 ## Getting Started
 
 ### Basic StyledTextLayout Usage
