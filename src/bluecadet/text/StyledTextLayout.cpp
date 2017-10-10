@@ -1,4 +1,8 @@
 /*
+ Based on Cinder's original TextLayout. Modified and exented by Bluecadet.
+*/
+
+/*
 Copyright (c) 2010, The Barbarian Group
 All rights reserved.
 
@@ -68,21 +72,22 @@ typedef std::wstring StringType;
 typedef wchar_t CharType;
 
 //==================================================
-// TextManager Helper
+// DeviceContextManager Helper
 //
-class TextManager : private ci::Noncopyable {
+
+class DeviceContextManager : private ci::Noncopyable {
 public:
-	TextManager() :
+	DeviceContextManager() :
 		mDummyDC(::CreateCompatibleDC(0)),
 		mGraphics(mDummyDC)
 	{
 	}
-	~TextManager() {
+	~DeviceContextManager() {
 		::DeleteDC(mDummyDC);
 	}
-	static TextManager*			instance() {
-		static TextManager* instance = nullptr;
-		if (!instance) instance = new TextManager();
+	static DeviceContextManager * instance() {
+		static DeviceContextManager* instance = nullptr;
+		if (!instance) instance = new DeviceContextManager();
 		return instance;
 	}
 	const HDC&					getDc() { return mDummyDC; }
@@ -93,6 +98,7 @@ private:
 	Gdiplus::Graphics	mGraphics;
 };
 
+
 //==================================================
 // Run Helper
 //
@@ -102,7 +108,7 @@ typedef shared_ptr<class Run> RunRef;
 
 class Run {
 public:
-	Run(const ci::Font& aFont, const ci::ColorA& aColor) :
+	Run(const ci::Font & aFont, const ci::ColorA & aColor) :
 		mFont(aFont),
 		mColor(aColor),
 		mHasInvalidExtents(true),
@@ -120,18 +126,18 @@ public:
 	}
 	~Run() {};
 
-	const ci::vec2&					getSize() { calcExtents(); return mSize; };
-	const StringType&				getText() const { return mWideText; }
-	const ci::ColorA&				getColor() const { return mColor; }
-	const ci::Font&					getFont() const { return mFont; }
-	const Gdiplus::StringFormat&	getFormat() const { return mFormat; }
+	const ci::vec2 &				getSize() { calcExtents(); return mSize; };
+	const StringType &				getText() const { return mWideText; }
+	const ci::ColorA &				getColor() const { return mColor; }
+	const ci::Font &				getFont() const { return mFont; }
+	const Gdiplus::StringFormat &	getFormat() const { return mFormat; }
 
-	void append(const StringType& text) {
+	void append(const StringType & text) {
 		mWideText.append(text);
 		mHasInvalidExtents = true;
 	}
 
-	void setText(const StringType& text) {
+	void setText(const StringType & text) {
 		mWideText = text;
 		mHasInvalidExtents = true;
 	}
@@ -147,7 +153,7 @@ protected:
 		mFormat.SetMeasurableCharacterRanges(1, &range);
 
 		Gdiplus::RectF sizeRect;
-		TextManager::instance()->getGraphics().MeasureString(mWideText.c_str(), -1, mFont.getGdiplusFont(), Gdiplus::PointF(0, 0), &mFormat, &sizeRect);
+		DeviceContextManager::instance()->getGraphics().MeasureString(mWideText.c_str(), -1, mFont.getGdiplusFont(), Gdiplus::PointF(0, 0), &mFormat, &sizeRect);
 		mSize.x = sizeRect.Width;
 		mSize.y = sizeRect.Height;
 		mHasInvalidExtents = false;
@@ -161,6 +167,7 @@ protected:
 	StringType				mWideText;
 	ci::vec2				mSize;
 };
+
 
 //==================================================
 // Line Helper
@@ -180,8 +187,8 @@ public:
 	~Line() {}
 
 	const ci::vec2&			getSize() { calcExtents(); return mSize; }
-	const vector<RunRef>&	getRuns() const { return mRuns; }
-	const TextAlign		getTextAlign() const { return mTextAlign; }
+	const vector<RunRef> &	getRuns() const { return mRuns; }
+	const TextAlign			getTextAlign() const { return mTextAlign; }
 	float					getLeadingOffset() const { return mLeadingOffset; };
 	bool					getLeadingDisabled() const { return mLeadingDisabled; }
 	float					getDescent() { calcExtents(); return mDescent; };
@@ -249,10 +256,10 @@ protected:
 };
 
 
-
 //==================================================
 // StyledTextLayout
 //
+
 StyledTextLayout::StyledTextLayout() :
 	mPaddingTop(0.0f),
 	mPaddingRight(0.0f),
@@ -267,8 +274,9 @@ StyledTextLayout::StyledTextLayout() :
 	mSizeTrimmingEnabled(false),
 	mTextSize(0, 0)
 {
-	// force any globals we need to be initialized, particularly GDI+ on Windows
-	TextManager::instance();
+	// forces any globals we need to be initialized, particularly GDI+ on Windows
+	DeviceContextManager::instance();
+
 	mCurrentStyle = StyleManager::getInstance()->getDefaultStyle();
 	mParseOptions = StyledTextParser::getInstance()->getDefaultOptions();
 }
@@ -293,57 +301,57 @@ void StyledTextLayout::clearText() {
 }
 
 
-void StyledTextLayout::setText(const wstring& text) { clearText(); appendText(text); }
-void StyledTextLayout::setText(const wstring& text, const string styleName) { clearText(); appendText(text, styleName, true); }
-void StyledTextLayout::setText(const wstring& text, const Style& style) { clearText(); appendText(text, style, true); }
+void StyledTextLayout::setText(const wstring & text) { clearText(); appendText(text); }
+void StyledTextLayout::setText(const wstring & text, const string styleName) { clearText(); appendText(text, styleName, true); }
+void StyledTextLayout::setText(const wstring & text, const Style& style) { clearText(); appendText(text, style, true); }
 
-void StyledTextLayout::appendText(const wstring& text) {
+void StyledTextLayout::appendText(const wstring & text) {
 	appendSegments(StyledTextParser::getInstance()->parse(text, mCurrentStyle, mParseOptions));
 }
-void StyledTextLayout::appendText(const wstring& text, const string& styleName, bool saveAsCurrentStyle) {
+void StyledTextLayout::appendText(const wstring & text, const string & styleName, bool saveAsCurrentStyle) {
 	Style style = StyleManager::getInstance()->getStyle(styleName);
 	if (saveAsCurrentStyle) setCurrentStyle(style);
 	appendSegments(StyledTextParser::getInstance()->parse(text, style, mParseOptions));
 }
-void StyledTextLayout::appendText(const wstring& text, const Style& style, bool saveAsCurrentStyle) {
+void StyledTextLayout::appendText(const wstring & text, const Style& style, bool saveAsCurrentStyle) {
 	if (saveAsCurrentStyle) setCurrentStyle(style);
 	appendSegments(StyledTextParser::getInstance()->parse(text, style, mParseOptions));
 }
 
-void StyledTextLayout::setPlainText(const wstring& text) { clearText(); appendPlainText(text); }
-void StyledTextLayout::setPlainText(const wstring& text, const string styleName) { clearText(); appendPlainText(text, styleName); }
-void StyledTextLayout::setPlainText(const wstring& text, const Style& style) { clearText(); appendPlainText(text, style); }
+void StyledTextLayout::setPlainText(const wstring & text) { clearText(); appendPlainText(text); }
+void StyledTextLayout::setPlainText(const wstring & text, const string styleName) { clearText(); appendPlainText(text, styleName); }
+void StyledTextLayout::setPlainText(const wstring & text, const Style& style) { clearText(); appendPlainText(text, style); }
 
-void StyledTextLayout::appendPlainText(const wstring& text) {
+void StyledTextLayout::appendPlainText(const wstring & text) {
 	appendSegment(StyledText(mCurrentStyle, text));
 }
-void StyledTextLayout::appendPlainText(const wstring& text, const string& styleName, bool saveAsCurrentStyle) {
+void StyledTextLayout::appendPlainText(const wstring & text, const string & styleName, bool saveAsCurrentStyle) {
 	Style style = StyleManager::getInstance()->getStyle(styleName);
 	if (saveAsCurrentStyle) setCurrentStyle(style);
 	appendSegment(StyledText(style, text));
 }
-void StyledTextLayout::appendPlainText(const wstring& text, const Style& style, bool saveAsCurrentStyle) {
+void StyledTextLayout::appendPlainText(const wstring & text, const Style& style, bool saveAsCurrentStyle) {
 	if (saveAsCurrentStyle) setCurrentStyle(style);
 	appendSegment(StyledText(style, text));
 }
 
 
 // std::string helpers to convert to widestring
-void StyledTextLayout::setText(const string& text) { setText(wideString(text)); }
-void StyledTextLayout::setText(const string& text, const string styleName) { setText(wideString(text), styleName); }
-void StyledTextLayout::setText(const string& text, const Style& style) { setText(wideString(text), style); }
+void StyledTextLayout::setText(const string & text) { setText(wideString(text)); }
+void StyledTextLayout::setText(const string & text, const string styleName) { setText(wideString(text), styleName); }
+void StyledTextLayout::setText(const string & text, const Style& style) { setText(wideString(text), style); }
 
-void StyledTextLayout::appendText(const string& text) { appendText(wideString(text)); }
-void StyledTextLayout::appendText(const string& text, const string& styleName, bool saveAsCurrentStyle) { appendText(wideString(text), styleName, saveAsCurrentStyle); }
-void StyledTextLayout::appendText(const string& text, const Style& style, bool saveAsCurrentStyle) { appendText(wideString(text), style, saveAsCurrentStyle); }
+void StyledTextLayout::appendText(const string & text) { appendText(wideString(text)); }
+void StyledTextLayout::appendText(const string & text, const string & styleName, bool saveAsCurrentStyle) { appendText(wideString(text), styleName, saveAsCurrentStyle); }
+void StyledTextLayout::appendText(const string & text, const Style& style, bool saveAsCurrentStyle) { appendText(wideString(text), style, saveAsCurrentStyle); }
 
-void StyledTextLayout::setPlainText(const string& text) { setPlainText(wideString(text)); }
-void StyledTextLayout::setPlainText(const string& text, const string styleName) { setPlainText(wideString(text), styleName); }
-void StyledTextLayout::setPlainText(const string& text, const Style& style) { setPlainText(wideString(text), style); }
+void StyledTextLayout::setPlainText(const string & text) { setPlainText(wideString(text)); }
+void StyledTextLayout::setPlainText(const string & text, const string styleName) { setPlainText(wideString(text), styleName); }
+void StyledTextLayout::setPlainText(const string & text, const Style& style) { setPlainText(wideString(text), style); }
 
-void StyledTextLayout::appendPlainText(const string& text) { appendPlainText(wideString(text)); }
-void StyledTextLayout::appendPlainText(const string& text, const string& styleName, bool saveAsCurrentStyle) { appendPlainText(wideString(text), styleName, saveAsCurrentStyle); }
-void StyledTextLayout::appendPlainText(const string& text, const Style& style, bool saveAsCurrentStyle) { appendPlainText(wideString(text), style, saveAsCurrentStyle); }
+void StyledTextLayout::appendPlainText(const string & text) { appendPlainText(wideString(text)); }
+void StyledTextLayout::appendPlainText(const string & text, const string & styleName, bool saveAsCurrentStyle) { appendPlainText(wideString(text), styleName, saveAsCurrentStyle); }
+void StyledTextLayout::appendPlainText(const string & text, const Style& style, bool saveAsCurrentStyle) { appendPlainText(wideString(text), style, saveAsCurrentStyle); }
 
 
 //==================================================
@@ -357,16 +365,16 @@ StyledTextLayout::ClipMode StyledTextLayout::getClipMode() const { return mClipM
 void StyledTextLayout::setClipMode(const ClipMode value) { mClipMode = value; invalidate(); }
 
 void StyledTextLayout::setCurrentStyle(Style style) { mCurrentStyle = style; }
-void StyledTextLayout::setCurrentStyle(const std::string& styleName) { mCurrentStyle = StyleManager::getInstance()->getStyle(styleName); }
+void StyledTextLayout::setCurrentStyle(const std::string & styleName) { mCurrentStyle = StyleManager::getInstance()->getStyle(styleName); }
 Style StyledTextLayout::getCurrentStyle() const { return mCurrentStyle; }
 
-void StyledTextLayout::setFontFamily(const string& family, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mFontFamily = family; }); }
+void StyledTextLayout::setFontFamily(const string & family, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mFontFamily = family; }); }
 void StyledTextLayout::setFontSize(const float fontSize, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mFontSize = fontSize; }); }
 void StyledTextLayout::setFontStyle(const FontStyle fontStyle, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mFontStyle = fontStyle; }); }
 void StyledTextLayout::setFontWeight(const FontWeight fontWeight, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mFontWeight = fontWeight; }); }
 
-void StyledTextLayout::setTextColor(const ci::Color &color, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mColor = color; }); }
-void StyledTextLayout::setTextColor(const ci::ColorA &color, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mColor = color; }); }
+void StyledTextLayout::setTextColor(const ci::Color & color, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mColor = color; }); }
+void StyledTextLayout::setTextColor(const ci::ColorA & color, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mColor = color; }); }
 
 void StyledTextLayout::setTextAlign(const TextAlign value, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mTextAlign = value; }); invalidate(); }
 
@@ -377,8 +385,8 @@ void StyledTextLayout::setLeadingOffset(float leadingOffset, bool updateExisting
 bool StyledTextLayout::getLeadingDisabled() const { return mLeadingDisabled; }
 void StyledTextLayout::setLeadingDisabled(const bool value, bool updateExistingText) { mLeadingDisabled = value; invalidate(); }
 
-ci::vec2 StyledTextLayout::getMaxSize() const { return mMaxSize; }
-void StyledTextLayout::setMaxSize(const ci::vec2& value) { mMaxSize = value; invalidate(); }
+const ci::vec2 & StyledTextLayout::getMaxSize() const { return mMaxSize; }
+void StyledTextLayout::setMaxSize(const ci::vec2 & value) { mMaxSize = value; invalidate(); }
 
 float StyledTextLayout::getMaxWidth() const { return mMaxSize.x; }
 void StyledTextLayout::setMaxWidth(const float value) { mMaxSize.x = value; invalidate(); }
@@ -411,17 +419,17 @@ void StyledTextLayout::setSizeTrimmingEnabled(const bool value) { mSizeTrimmingE
 //
 const std::vector<StyledText>& StyledTextLayout::getSegments() const { return mSegments; }
 
-void StyledTextLayout::setSegment(const StyledText& segment) { clearText(); appendSegment(segment); }
-void StyledTextLayout::setSegments(const std::vector<StyledText>& segments) { clearText(); appendSegments(segments); }
+void StyledTextLayout::setSegment(const StyledText & segment) { clearText(); appendSegment(segment); }
+void StyledTextLayout::setSegments(const std::vector<StyledText> & segments) { clearText(); appendSegments(segments); }
 
-void StyledTextLayout::appendSegments(const std::vector<StyledText>& segments) {
+void StyledTextLayout::appendSegments(const std::vector<StyledText> & segments) {
 	const auto baseStyle = mCurrentStyle;
 	for (auto& segment : segments) {
 		appendSegment(segment);
 	}
 	setCurrentStyle(baseStyle); // re-apply base style
 }
-void StyledTextLayout::appendSegment(const StyledText& segment) {
+void StyledTextLayout::appendSegment(const StyledText & segment) {
 	//setCurrentStyle(segment.mStyle);
 	mSegments.push_back(segment);
 
@@ -521,7 +529,7 @@ void StyledTextLayout::appendSegment(const StyledText& segment) {
 	mHasInvalidLayout = false; // mark layout as valid
 }
 
-shared_ptr<Line> StyledTextLayout::addLine(const Style& style) {
+shared_ptr<Line> StyledTextLayout::addLine(const Style & style) {
 	invalidate(false, true);
 	shared_ptr<Line> line(new Line(style.mTextAlign, style.mLeadingOffset, mLeadingDisabled));
 	mLines.push_back(line);

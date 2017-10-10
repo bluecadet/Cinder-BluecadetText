@@ -1,4 +1,8 @@
 /*
+ Based on Cinder's original TextLayout. Modified and exented by Bluecadet.
+*/
+
+/*
  Copyright (c) 2010, The Barbarian Group
  All rights reserved.
 
@@ -30,12 +34,6 @@
 
 #include "Text.h"
 
-//! Core Text forward declarations
-#if defined( CINDER_COCOA )
-struct __CTFrame;
-struct __CTLine;
-#endif
-
 namespace bluecadet {
 namespace text {
 
@@ -66,7 +64,6 @@ public:
 	static StyledTextLayoutRef create(Style style = Style());
 
 
-
 	//! Removes all text
 	void clearText();
 
@@ -77,63 +74,62 @@ public:
 	bool hasChanges() const;
 
 
-
 	//! Replaces the current text and keeps the current style. Parses supported style tags.
-	void setText(const std::string& text);
+	void setText(const std::string & text);
 	//! Replaces the current text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void setText(const std::string& text, const std::string styleName);
+	void setText(const std::string & text, const std::string styleName);
 	//! Replaces the current text and and sets the current style. Parses supported style tags.
-	void setText(const std::string& text, const Style& style);
+	void setText(const std::string & text, const Style& style);
 
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Parses supported style tags.
-	void appendText(const std::string& text);
+	void appendText(const std::string & text);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void appendText(const std::string& text, const std::string& styleName, bool saveAsCurrentStyle = false);
+	void appendText(const std::string & text, const std::string & styleName, bool saveAsCurrentStyle = false);
 	//! Appends text to any existing text and and sets the current style. Parses supported style tags.
-	void appendText(const std::string& text, const Style& style, bool saveAsCurrentStyle = false);
+	void appendText(const std::string & text, const Style& style, bool saveAsCurrentStyle = false);
 
 	//! Replaces the current text with plain text and keeps the current style. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void setPlainText(const std::string& text);
+	void setPlainText(const std::string & text);
 	//! Replaces the current text with plain text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void setPlainText(const std::string& text, const std::string styleName);
+	void setPlainText(const std::string & text, const std::string styleName);
 	//! Replaces the current text with plain text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void setPlainText(const std::string& text, const Style& style);
+	void setPlainText(const std::string & text, const Style& style);
 
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void appendPlainText(const std::string& text);
+	void appendPlainText(const std::string & text);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void appendPlainText(const std::string& text, const std::string& styleName, bool saveAsCurrentStyle = false);
+	void appendPlainText(const std::string & text, const std::string & styleName, bool saveAsCurrentStyle = false);
 	//! Appends text to any existing text and and sets the current style. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void appendPlainText(const std::string& text, const Style& style, bool saveAsCurrentStyle = false);
+	void appendPlainText(const std::string & text, const Style& style, bool saveAsCurrentStyle = false);
 
 
 	//! Replaces the current text and keeps the current style. Parses supported style tags.
-	void setText(const std::wstring& text);
+	void setText(const std::wstring & text);
 	//! Replaces the current text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void setText(const std::wstring& text, const std::string styleName);
+	void setText(const std::wstring & text, const std::string styleName);
 	//! Replaces the current text and and sets the current style. Parses supported style tags.
-	void setText(const std::wstring& text, const Style& style);
+	void setText(const std::wstring & text, const Style& style);
 
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Parses supported style tags.
-	void appendText(const std::wstring& text);
+	void appendText(const std::wstring & text);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void appendText(const std::wstring& text, const std::string& styleName, bool saveAsCurrentStyle = false);
+	void appendText(const std::wstring & text, const std::string & styleName, bool saveAsCurrentStyle = false);
 	//! Appends text to any existing text and and sets the current style. Parses supported style tags.
-	void appendText(const std::wstring& text, const Style& style, bool saveAsCurrentStyle = false);
+	void appendText(const std::wstring & text, const Style& style, bool saveAsCurrentStyle = false);
 
 	//! Replaces the current text with plain text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void setPlainText(const std::wstring& text);
+	void setPlainText(const std::wstring & text);
 	//! Replaces the current text with plain text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void setPlainText(const std::wstring& text, const std::string styleName);
+	void setPlainText(const std::wstring & text, const std::string styleName);
 	//! Replaces the current text with plain text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void setPlainText(const std::wstring& text, const Style& style);
+	void setPlainText(const std::wstring & text, const Style& style);
 
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void appendPlainText(const std::wstring& text);
+	void appendPlainText(const std::wstring & text);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void appendPlainText(const std::wstring& text, const std::string& styleName, bool saveAsCurrentStyle = false);
+	void appendPlainText(const std::wstring & text, const std::string & styleName, bool saveAsCurrentStyle = false);
 	//! Appends text to any existing text and and sets the current style. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
-	void appendPlainText(const std::wstring& text, const Style& style, bool saveAsCurrentStyle = false);
+	void appendPlainText(const std::wstring & text, const Style& style, bool saveAsCurrentStyle = false);
 
 
 
@@ -146,8 +142,8 @@ public:
 	void setClipMode(const ClipMode value);
 
 	// Combines max width and height. Defaults to (-1, -1), which disables max width and height, allowing both to expand infinitely.
-	virtual ci::vec2 getMaxSize() const;
-	virtual void setMaxSize(const ci::vec2& size);
+	virtual const ci::vec2 & getMaxSize() const;
+	virtual void setMaxSize(const ci::vec2 & size);
 
 	//! Max width to use in combination with layout Clip and WordWrap. Defaults to -1.0. Widths smaller than 0 disable word wrapping and clipping.
 	virtual float getMaxWidth() const;
@@ -187,10 +183,9 @@ public:
 	float getPaddingLeft() const;
 
 
-
 	//! Sets the style for any future text where style is not explicitly set
 	void setCurrentStyle(Style style);
-	void setCurrentStyle(const std::string& styleName);
+	void setCurrentStyle(const std::string & styleName);
 	Style getCurrentStyle() const;
 
 	//! Sets the currently active color. Implicit opqaue alpha.
@@ -213,7 +208,7 @@ public:
 	void setTextTransform(const TextTransform value, bool updateExistingText = true);
 
 	//! Sets the font family for any future text
-	void setFontFamily(const std::string& fontFamily, bool updateExistingText = true);
+	void setFontFamily(const std::string & fontFamily, bool updateExistingText = true);
 
 	//! Sets the font size for any future text
 	void setFontSize(const float fontSize, bool updateExistingText = true);
@@ -225,24 +220,20 @@ public:
 	void setFontWeight(const FontWeight fontWeight, bool updateExistingText = true);
 
 
-
-
+	//! Replaces the current text and styles. Will preserve the current style before and after calling this method.
+	inline void setSegment(const StyledText & segment);
 
 	//! Replaces the current text and styles. Will preserve the current style before and after calling this method.
-	inline void setSegment(const StyledText& segment);
-
-	//! Replaces the current text and styles. Will preserve the current style before and after calling this method.
-	inline void setSegments(const std::vector<StyledText>& segments);
+	inline void setSegments(const std::vector<StyledText> & segments);
 
 	//! Appends a single segment of styled text. Will preserve the current style before and after calling this method.
-	inline void appendSegment(const StyledText& segment);
+	inline void appendSegment(const StyledText & segment);
 
 	//! Appends segments of styled text. Will preserve the current style before and after calling this method.
-	inline void appendSegments(const std::vector<StyledText>& segments);
+	inline void appendSegments(const std::vector<StyledText> & segments);
 
 	//! Returns all of the current segments of text
-	inline const std::vector<StyledText>& getSegments() const;
-
+	inline const std::vector<StyledText> & getSegments() const;
 
 
 protected:
@@ -256,10 +247,10 @@ protected:
 	inline void	validateSize();
 
 	//! Helper to modify all styles of existing segments and the current style
-	void		modifyStyles(bool updateExistingText, std::function<void(Style& style)> fn);
+	void		modifyStyles(bool updateExistingText, std::function<void(Style & style)> fn);
 
 	//! Adds a single, empty line with the current style and returns it.
-	std::shared_ptr<class Line>	addLine(const Style& style);
+	std::shared_ptr<class Line>	addLine(const Style & style);
 
 
 
