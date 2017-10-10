@@ -46,7 +46,7 @@ This block is compatible with and used by [Cinder-BluecadetViews](https://github
 
 ### Example
 
-![](docs/media/word-wrap-sample.gif)
+![](docs/media/word-wrap-sample.png)
 
 ## Getting Started
 
