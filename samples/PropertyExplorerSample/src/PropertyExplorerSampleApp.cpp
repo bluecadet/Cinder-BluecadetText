@@ -14,7 +14,7 @@ using namespace ci::app;
 using namespace std;
 using namespace bluecadet::text;
 
-class TextLayoutPropertyExplorerApp : public App {
+class PropertyExplorerSampleApp : public App {
 public:
 	void setup() override;
 	void update() override;
@@ -40,7 +40,7 @@ protected:
 	bool mDrawTextBoxOnTop = false;
 };
 
-void TextLayoutPropertyExplorerApp::setup()
+void PropertyExplorerSampleApp::setup()
 {
 
 	/*
@@ -53,7 +53,7 @@ void TextLayoutPropertyExplorerApp::setup()
 	FontManager will determine which font is returned based on the json.
 	*/
 	FontManager::getInstance()->setLogLevel(FontManager::LogLevel::Warning);
-	FontManager::getInstance()->setup(getAssetPath("Fonts/fonts.json"));
+	FontManager::getInstance()->setup(getAssetPath("fonts.json"));
 
 	/*
 	The style manager loads a single json that defines the default
@@ -63,7 +63,7 @@ void TextLayoutPropertyExplorerApp::setup()
 	the app. All StyledTextLayout instances use the shared style
 	manager to load styles.
 	*/
-	StyleManager::getInstance()->setup(getAssetPath("Fonts/styles.json"), "styles");
+	StyleManager::getInstance()->setup(getAssetPath("styles.json"), "styles");
 
 	/*
 	A shared text parser is used to parse simple html tags from text
@@ -118,25 +118,22 @@ void TextLayoutPropertyExplorerApp::setup()
 	mParams->addParam("Force Updates", &mForceUpdates);
 }
 
-void TextLayoutPropertyExplorerApp::update() {
+void PropertyExplorerSampleApp::update() {
 	if (mTextLayout->hasChanges() && !mForceUpdates) {
 		updateText();
 	}
 }
 
-void TextLayoutPropertyExplorerApp::loadText() {
+void PropertyExplorerSampleApp::loadText() {
 	mLoremIpsum = loadString(loadAsset("lorem_ipsum.txt"));
 }
 
-void TextLayoutPropertyExplorerApp::updateText() {
-	/*mTextLayout->setText("This is a test title", "test.title");
-	mTextLayout->appendText("<br>" + mLoremIpsum, "test.body");*/
-
+void PropertyExplorerSampleApp::updateText() {
 	mTextSurface = mTextLayout->renderToSurface();
 	mTextTexture = gl::Texture::create(mTextSurface);
 }
 
-void TextLayoutPropertyExplorerApp::draw()
+void PropertyExplorerSampleApp::draw()
 {
 	gl::clear(Color(0.3f, 0.3f, 0.3f));
 
@@ -175,14 +172,9 @@ void TextLayoutPropertyExplorerApp::draw()
 
 	// draw debug info
 	mParams->draw();
-
-	gl::color(ColorA(0, 0, 0, 0.5f));
-	gl::drawSolidRect(Rectf(0, (float)getWindowHeight() - 25.0f, 160.0f, (float)getWindowHeight()));
-	gl::drawString(to_string(getAverageFps()), vec2(0, (float)getWindowHeight() - 25.0f), ColorA(1.0f, 0.0f, 0.0f, 1.0f), FontManager::getInstance()->getFont("Arial", 32));
-
 }
 
-void TextLayoutPropertyExplorerApp::resize() {
+void PropertyExplorerSampleApp::resize() {
 	float width = (float)getWindowWidth() * 0.5f;
 	mTextLayout->setMaxWidth(width);
 
@@ -194,8 +186,8 @@ void TextLayoutPropertyExplorerApp::resize() {
 	mParams->setPosition(paramsPos);
 }
 
-CINDER_APP(TextLayoutPropertyExplorerApp,
-	RendererGl(RendererGl::Options().msaa(2)), // use msaa > 1 to render text more smoothly
+CINDER_APP(PropertyExplorerSampleApp,
+	RendererGl(RendererGl::Options().msaa(4)),
 	[&](ci::app::App::Settings *settings)
 {
 	settings->setWindowSize(900, 640);

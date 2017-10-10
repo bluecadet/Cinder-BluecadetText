@@ -13,26 +13,26 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
     <Filter Include="Blocks">
-      <UniqueIdentifier>{14FAFE44-6449-4508-A63E-6D258732FA9A}</UniqueIdentifier>
+      <UniqueIdentifier>{0E85CD61-C351-4006-85E7-293C5FF16BD2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\BluecadetText">
-      <UniqueIdentifier>{CA71AB30-906E-4F6D-8E47-44BB1727FFE4}</UniqueIdentifier>
+      <UniqueIdentifier>{0808D8CB-2616-48B5-8A1E-CC438935B354}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\BluecadetText\src">
-      <UniqueIdentifier>{42CD3BC3-C9B7-40BA-A9C2-986103570824}</UniqueIdentifier>
+      <UniqueIdentifier>{1326F4DF-0B31-498F-B5F2-C29764ED0697}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\BluecadetText\src\bluecadet">
-      <UniqueIdentifier>{F6E45B38-23AB-4FD7-8646-90F921984910}</UniqueIdentifier>
+      <UniqueIdentifier>{443C4414-0F2A-4B86-A2E7-FA58199B7AA6}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\BluecadetText\src\bluecadet\text">
-      <UniqueIdentifier>{AF1C80B7-090B-4491-A87A-63242962EEA2}</UniqueIdentifier>
+      <UniqueIdentifier>{18EF41CA-C2AB-4FA8-9859-74765DB4AF9C}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\BasicSampleApp.cpp">
+    <ClCompile Include="..\src\PropertyExplorerSampleApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\BasicSampleApp.cpp">
+    <ClCompile Include="..\src\PropertyExplorerSampleApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClInclude Include="..\include\Resources.h">

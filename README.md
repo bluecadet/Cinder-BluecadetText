@@ -6,7 +6,7 @@ Built around the need to have multi-line, auto-wrapping text with inline styles,
 
 The core text rendering code is based on Cinder's own [`TextLayout`](https://libcinder.org/docs/classcinder_1_1_text_layout.html), but expands on layout, styling and caching functionality.
 
-Built for and tested with [Cinder v0.9.1](https://github.com/cinder/Cinder/tree/v0.9.1) on Windows 7, 8.1 and 10. See [notes below](#notes) for setup instructions.
+Built for and tested with [Cinder v0.9.2 dev](https://github.com/cinder/Cinder/) on Windows 7, 8.1 and 10. See [notes below](#notes) for setup instructions.
 
 *Windows only! StyledTextLayout uses Windows-only GDI+ and currently has no Linux/Mac support.*
 
@@ -55,7 +55,7 @@ This block is compatible with and used by [Cinder-BluecadetViews](https://github
 
 // ...
 
-auto textLayout = StyledTextLayoutRef(new StyledTextLayout());
+auto textLayout = make_shared<StyledTextLayout>();
 textLayout->setClipMode(StyledTextLayout::ClipMode::NoClip);
 textLayout->setLayoutMode(StyledTextLayout::LayoutMode::WordWrap);
 textLayout->setPadding(16.f, 8.f, 16.f, 8.f);
@@ -73,7 +73,7 @@ auto texture = gl::Texture::create(surface);
 gl::draw(texture);
 ```
 
-### Rendering Font Weights and Styles
+### Font Weights and Styles
 
 In order to display custom font weights and styles, you need to define a `json` file that points to local font files for each weight and style. Here's an example file:
 
@@ -113,17 +113,15 @@ And initializing the fonts is a single line using the `FontManager`. Instances o
 #include "bluecadet/text/FontManager.h"
 #include "bluecadet/text/StyledTextLayout.h"
 
-// ...
+// setup
 
 FontManager::getInstance()->setup(getAssetPath("Fonts/fonts.json"));
 
-// ...
-
-auto textLayout = StyledTextLayoutRef(new StyledTextLayout());
+auto textLayout = make_shared<StyledTextLayout>();
 textLayout->setFontFamily("OpenSans");
 textLayout->setText("Jaded <b><i>zombies</i> acted<br/>quaintly</b> but kept driving <i>their oxen</i>.");
 
-// ...
+// draw
 
 auto surface = textLayout->renderToSurface();
 auto texture = gl::Texture::create(surface);
@@ -132,8 +130,47 @@ gl::draw(texture);
 
 ### Managing and Using Styles
 
+Styles can be defined manually on each `StyledTextLayout` instance or globally in a `json` file using `StyleManager`.
+
+#### Example `styles.json`
+
+All styles defined in the root element (in this case `styles`) determine the base styles. Any child elements will inherit their parent's style and can overwrite individual properties (similar to the way [SASS](http://sass-lang.com/) works).
+
+```json
+{
+    "styles": {
+        "fontFamily": "OpenSans",
+        "fontStyle": "normal",
+        "fontWeight": 400,
+        "fontSize": 16,
+        "textAlign": "left",
+        "textTransform": "none",
+        "color": "#ffffff",
+        "leadingOffset": 0,
+        "title": {
+            "fontWeight": 500,
+            "fontSize": 48.0,
+            "textAlign": "center",
+            
+            "title_left": {
+                "textAlign": "left"
+            }
+        },
+        "subtitle": {
+            "fontSize": 24
+        }
+    }
+}
+```
+
+This json can be loaded by the `StyleManager` and refered to later by any `StyledTextLayout` instance.
+
 ```c++
-// TODO
+StyleManager::getInstance()->setup(getAssetPath("styles.json"), "styles");
+
+auto textLayout = make_shared<StyledTextLayout>();
+textLayout->setCurrentStyle("title");
+textLayout->setText("This will be styled as a title");
 ```
 
 ## Known Issues
@@ -143,6 +180,8 @@ gl::draw(texture);
 
 ## Future Wishlist
 
+* Switch to crossplatform renderer (e.g. https://github.com/chaoticbob/Cinder-SdfText)
+* Abstract away text measurement and rendering to allow for any type of text lib/framework
 * Allow for nested styles within one `StyledTextView` using XML markup (e.g. `"<body>And then he said: <quote>\"That's just nice\"</quote></body>"`; could also just use HTML tags)
 * Better line-height calculations and override using multiples of font-size
 * Actual CSS or SASS support (instead of JSON)
@@ -150,20 +189,20 @@ gl::draw(texture);
 
 ## Notes
 
-Version 1.1.0
+Version 1.1.1
 
-Based on [Cinder v0.9.1](https://github.com/cinder/Cinder/tree/v0.9.1)
+Based on [Cinder v0.9.2 dev](https://github.com/cinder/Cinder)
 
 Cinder setup instructions:
 
 ```bash
-git clone -b v0.9.1 --depth 1 --recursive https://github.com/cinder/Cinder.git
-```
+# Cinder dev
+git clone --depth 1 --recursive https://github.com/cinder/Cinder.git
 
-Cloning with all dependencies:
+# Cinder 0.9.1 stable
+# git clone -b v0.9.1 --depth 1 --recursive https://github.com/cinder/Cinder.git
 
-```bash
+# Bluecadet blocks + dependencies
 cd Cinder/blocks
 git clone git@github.com:bluecadet/Cinder-BluecadetText.git
-git clone git@github.com:bluecadet/Cinder-BluecadetView.git
 ```

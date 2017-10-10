@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <Filter Include="Source Files">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
@@ -13,26 +13,26 @@
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
     <Filter Include="Blocks">
-      <UniqueIdentifier>{FE9096AD-5BA9-4F3A-BF9D-218F46B3FD68}</UniqueIdentifier>
+      <UniqueIdentifier>{1D49DA99-C0FD-4F2A-A886-E22B6327CFA8}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\BluecadetText">
-      <UniqueIdentifier>{539F9D6C-255D-4B8A-8B02-FAEBED635303}</UniqueIdentifier>
+      <UniqueIdentifier>{44BB2818-0BCB-4084-B2AE-A73279718089}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\BluecadetText\src">
-      <UniqueIdentifier>{0B736EDF-8363-4936-A0AB-EF843BC6886E}</UniqueIdentifier>
+      <UniqueIdentifier>{D33AF19F-1102-4F4B-A210-7C37941B2933}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\BluecadetText\src\bluecadet">
-      <UniqueIdentifier>{369c015d-74ea-490f-a6cf-b20d17847e66}</UniqueIdentifier>
+      <UniqueIdentifier>{B89029C9-76F0-433E-A029-FE26FCDFE907}</UniqueIdentifier>
     </Filter>
     <Filter Include="Blocks\BluecadetText\src\bluecadet\text">
-      <UniqueIdentifier>{cd58b76c-0526-459c-957d-bc44ced9d48e}</UniqueIdentifier>
+      <UniqueIdentifier>{88CFD19D-B803-412E-A7FD-7B2CE46CE157}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\TextLayoutPropertyExplorerApp.cpp">
+    <ClCompile Include="..\src\BasicSampleApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\TextLayoutPropertyExplorerApp.cpp">
+    <ClCompile Include="..\src\BasicSampleApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClInclude Include="..\include\Resources.h">
@@ -50,11 +50,6 @@
     <ClCompile Include="..\..\..\src\bluecadet\text\StyleManager.cpp">
       <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\include\Resources.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\..\src\bluecadet\text\FontManager.h">
       <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
     </ClInclude>
@@ -69,6 +64,11 @@
     </ClInclude>
     <ClInclude Include="..\..\..\src\bluecadet\text\Text.h">
       <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Resources.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
