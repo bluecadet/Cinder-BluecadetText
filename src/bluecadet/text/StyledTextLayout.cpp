@@ -260,7 +260,7 @@ StyledTextLayout::StyledTextLayout() :
 	mPaddingLeft(0.0f),
 	mLayoutMode(WordWrap),
 	mClipMode(Clip),
-	mMaxSize(0),
+	mMaxSize(-1.0f, -1.0f),
 	mLeadingDisabled(true),
 	mHasInvalidSize(false),
 	mHasInvalidLayout(false),
@@ -377,14 +377,14 @@ void StyledTextLayout::setLeadingOffset(float leadingOffset, bool updateExisting
 bool StyledTextLayout::getLeadingDisabled() const { return mLeadingDisabled; }
 void StyledTextLayout::setLeadingDisabled(const bool value, bool updateExistingText) { mLeadingDisabled = value; invalidate(); }
 
-const ci::vec2 & StyledTextLayout::getMaxSize() const { return mMaxSize; }
-void StyledTextLayout::setMaxSize(const ci::vec2& value) { if (value != mMaxSize) { mMaxSize = value; invalidate(); } }
+ci::vec2 StyledTextLayout::getMaxSize() const { return mMaxSize; }
+void StyledTextLayout::setMaxSize(const ci::vec2& value) { mMaxSize = value; invalidate(); }
 
 float StyledTextLayout::getMaxWidth() const { return mMaxSize.x; }
-void StyledTextLayout::setMaxWidth(const float value) { if (value != mMaxSize.x) { mMaxSize.x = value; invalidate(); } }
+void StyledTextLayout::setMaxWidth(const float value) { mMaxSize.x = value; invalidate(); }
 
 float StyledTextLayout::getMaxHeight() const { return mMaxSize.y; }
-void StyledTextLayout::setMaxHeight(const float value) { if (value != mMaxSize.y) { mMaxSize.y = value; invalidate(); } }
+void StyledTextLayout::setMaxHeight(const float value) { mMaxSize.y = value; invalidate(); }
 
 void StyledTextLayout::setPadding(const float vertical, const float horizontal) { mPaddingTop = mPaddingBottom = vertical; mPaddingRight = mPaddingLeft = horizontal; invalidate(); }
 void StyledTextLayout::setPadding(const float padding) { mPaddingTop = mPaddingRight = mPaddingBottom = mPaddingLeft = padding; invalidate(); }
@@ -546,7 +546,7 @@ ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied)
 	ci::ivec2 bitmapSize = getTextSize();
 
 	// Odd failure - return a NULL Surface
-	if (bitmapSize.x <= 0 || bitmapSize.y <= 0) {
+	if (bitmapSize.x < 0 || bitmapSize.y < 0) {
 		return result;
 	}
 
@@ -605,10 +605,10 @@ void StyledTextLayout::validateSize() {
 		return;
 	}
 
-	mTextSize = ci::ivec2(mPaddingLeft + mPaddingRight, mPaddingTop + mPaddingBottom);
+	mTextSize = ci::ivec2(0, 0);
 
 	// Make sure padding doesn't exceed max width
-	if (mMaxSize.x >= 0 && mPaddingLeft + mPaddingRight <= mMaxSize.x) {
+	if (mMaxSize.x < 0.0f || mPaddingLeft + mPaddingRight <= mMaxSize.x) {
 
 		// Determine the extents for all the lines and the result surface
 		float totalHeight = mPaddingTop + mPaddingBottom;
@@ -619,7 +619,7 @@ void StyledTextLayout::validateSize() {
 			totalHeight = max(totalHeight, totalHeight + line->getSize().y + line->getLeadingOffset());
 		}
 
-		if (mMaxSize.x > 0) {
+		if (mMaxSize.x >= 0.0f) {
 			if (!mSizeTrimmingEnabled && mClipMode != NoClip) {
 				totalWidth = mMaxSize.x;
 			} else if (mClipMode == Clip) {
@@ -640,7 +640,7 @@ void StyledTextLayout::validateSize() {
 		mTextSize = ci::ivec2(pixelWidth, pixelHeight);
 	}
 
-	if (mMaxSize.y > 0) {
+	if (mMaxSize.y >= 0 || mPaddingTop + mPaddingBottom <= mMaxSize.y) {
 		if (!mSizeTrimmingEnabled && mClipMode != NoClip) {
 			mTextSize.y = (int)ci::math<float>::ceil(mMaxSize.y);
 		} else if (mClipMode == Clip) {
