@@ -545,8 +545,7 @@ bool StyledTextLayout::hasChanges() const {
 	return mHasInvalidLayout || mHasInvalidSize;
 }
 
-ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied)
-{
+ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied, const ci::ColorA8u & clearColor) {
 	validateLayout();
 	validateSize();
 
@@ -568,7 +567,7 @@ ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied)
 	Gdiplus::Bitmap *offscreenBitmap = ci::msw::createGdiplusBitmap(result);
 	Gdiplus::Graphics *offscreenGraphics = Gdiplus::Graphics::FromImage(offscreenBitmap);
 	offscreenGraphics->SetTextRenderingHint(Gdiplus::TextRenderingHint::TextRenderingHintAntiAlias);
-	offscreenGraphics->Clear(Gdiplus::Color::Transparent);
+	offscreenGraphics->Clear(Gdiplus::Color(clearColor.a, clearColor.r, clearColor.g, clearColor.b));
 
 	// walk the lines and getSurface them, advancing our Y offset along the way
 	float currentY = mPaddingTop;
