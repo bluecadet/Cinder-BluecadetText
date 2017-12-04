@@ -193,7 +193,7 @@ textLayout->setText("This will be styled as a title");
 
 ## Notes
 
-Version 1.1.1
+Version 1.1.2
 
 Based on [Cinder v0.9.2 dev](https://github.com/cinder/Cinder)
 
