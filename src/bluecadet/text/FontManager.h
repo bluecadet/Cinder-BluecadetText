@@ -3,6 +3,8 @@
 #include "cinder/app/RendererGl.h"
 #include "cinder/gl/gl.h"
 
+#include "cinder/gl/SdfText.h"
+
 #include "Text.h"
 
 namespace bluecadet {
@@ -42,10 +44,14 @@ public:
 	//! Font files should be in the json directory or in one of its child directories.
 	void setup(ci::fs::path jsonPath);
 
-	ci::Font& getFont(Style style, FallbackMode fallbackMode = Adaptive);
-	ci::Font& getFont(std::string family, float size, int weight = Regular, FontStyle style = Normal, FallbackMode fallbackMode = Adaptive);
-	ci::Font& getCachedFontByPath(std::string path, float size);
-	ci::Font& getCachedFontByName(std::string name, float size);
+	const ci::gl::SdfText::Font & getFont(Style style, FallbackMode fallbackMode = Adaptive);
+	const ci::gl::SdfText::Font & getFont(std::string family, float size, int weight = Regular, FontStyle style = Normal, FallbackMode fallbackMode = Adaptive);
+
+	const ci::gl::SdfText::Font & getCachedFontByPath(std::string path, float size);
+	const ci::gl::SdfText::Font & getCachedFontByName(std::string name, float size);
+
+	ci::gl::SdfTextRef getText(Style style, FallbackMode fallbackMode = Adaptive);
+	ci::gl::SdfTextRef getText(std::string family, float size, int weight = Regular, FontStyle style = Normal, FallbackMode fallbackMode = Adaptive);
 
 	//! Defaults to Arial
 	std::string getDefaultName() const { return mDefaultName; }
@@ -75,11 +81,12 @@ protected:
 	StylesByWeight::iterator getFallbackWeight(StylesByWeight& weights, int targetWeight, FontStyle style, FallbackMode fallbackMode);
 
 	//! Get the font sizes map for a key (either font path or font name)
-	std::map<float, ci::Font>& getCachedSizesForFont(std::string key);
+	std::map<float, ci::gl::SdfText::Font>& getCachedSizesForFont(std::string key);
 
 protected:
 	WeightsByFamily mWeightsByFamily;
-	std::map<std::string, std::map<float, ci::Font>> mCachedFonts;
+	std::map<std::string, std::map<float, ci::gl::SdfText::Font>> mCachedFonts;
+	std::map<std::string, ci::gl::SdfTextRef> mCachedTexts;
 
 	std::string mDefaultName;
 	FontStyle mDefaultStyle;

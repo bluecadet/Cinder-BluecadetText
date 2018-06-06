@@ -53,6 +53,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #pragma comment(lib, "gdiplus")
 #include "cinder/Unicode.h"
 
+#include "cinder/gl/SdfText.h"
+
 #include <limits.h>
 #include <locale>
 #include <codecvt>
@@ -108,8 +110,8 @@ typedef shared_ptr<class Run> RunRef;
 
 class Run {
 public:
-	Run(const ci::Font & aFont, const ci::ColorA & aColor) :
-		mFont(aFont),
+	Run(ci::gl::SdfTextRef sdfText, const ci::ColorA & aColor) :
+		mSdfText(sdfText),
 		mColor(aColor),
 		mHasInvalidExtents(true),
 		mFormat(Gdiplus::StringFormat::GenericTypographic())	// trims and measures string correctly
@@ -129,7 +131,8 @@ public:
 	const ci::vec2 &				getSize() { calcExtents(); return mSize; };
 	const StringType &				getText() const { return mWideText; }
 	const ci::ColorA &				getColor() const { return mColor; }
-	const ci::Font &				getFont() const { return mFont; }
+	//const ci::gl::SdfText::Font &	getFont() const { return mFont; }
+	const ci::gl::SdfTextRef		getSdfText() const { return mSdfText; }
 	const Gdiplus::StringFormat &	getFormat() const { return mFormat; }
 
 	void append(const StringType & text) {
@@ -152,20 +155,25 @@ protected:
 		auto range = Gdiplus::CharacterRange(0, (int)mWideText.length());
 		mFormat.SetMeasurableCharacterRanges(1, &range);
 
-		Gdiplus::RectF sizeRect;
-		DeviceContextManager::instance()->getGraphics().MeasureString(mWideText.c_str(), -1, mFont.getGdiplusFont(), Gdiplus::PointF(0, 0), &mFormat, &sizeRect);
-		mSize.x = sizeRect.Width;
-		mSize.y = sizeRect.Height;
+		//Gdiplus::RectF sizeRect;
+		//DeviceContextManager::instance()->getGraphics().MeasureString(mWideText.c_str(), -1, mFont.getGdiplusFont(), Gdiplus::PointF(0, 0), &mFormat, &sizeRect);
+		//mSize.x = sizeRect.Width;
+		//mSize.y = sizeRect.Height;
+		mSize = mSdfText->measureString(bluecadet::text::narrowString(mWideText));
 		mHasInvalidExtents = false;
 	}
 
 protected:
 	Gdiplus::StringFormat	mFormat;
 	bool					mHasInvalidExtents;
-	ci::Font				mFont;
+	ci::gl::SdfTextRef		mSdfText;
 	ci::ColorA				mColor;
 	StringType				mWideText;
 	ci::vec2				mSize;
+
+	// SDF temp
+	static std::map<std::string, ci::gl::SdfText::Font> sSdfFontCache;
+	static std::map<std::string, ci::gl::SdfTextRef> sSdfTextCache;
 };
 
 
@@ -209,15 +217,17 @@ public:
 
 		for (auto run : mRuns) {
 			mSize.x += run->getSize().x;
-			mAscent = std::max(run->getFont().getAscent(), mAscent);
-			mDescent = std::max(run->getFont().getDescent(), mDescent);
+			const auto & font = run->getSdfText()->getFont();
+
+			mAscent = std::max(font.getAscent(), mAscent);
+			mDescent = std::max(font.getDescent(), mDescent);
 
 			if (mLeadingDisabled) {
 				//mLeading = 1.0f; // seems necessary to correctly measure layout when using a typographic format
 				mLeading = 0.0f;
 			}
 			else {
-				mLeading = std::max(run->getFont().getLeading(), mLeading);
+				mLeading = std::max(font.getLeading(), mLeading);
 			}
 
 			mSize.y = std::max(mSize.y, run->getSize().y);
@@ -227,7 +237,7 @@ public:
 		mHasInvalidExtents = false;
 	}
 
-	void render(Gdiplus::Graphics * graphics, float currentY, float paddingLeft, float paddingRight, float maxWidth) {
+	void render(float currentY, float paddingLeft, float paddingRight, float maxWidth) {
 		float currentX = paddingLeft;
 		if (mTextAlign == TextAlign::Center) {
 			currentX = (maxWidth - mSize.x) * 0.5f;
@@ -237,12 +247,36 @@ public:
 		}
 
 		for (auto run : mRuns) {
+			//const ci::ColorA8u nativeColor(run->getColor());
+			//const Gdiplus::Font * font = run->getFont().getGdiplusFont();
+			//const Gdiplus::SolidBrush brush(Gdiplus::Color(nativeColor.a, nativeColor.r, nativeColor.g, nativeColor.b));
+			//const Gdiplus::PointF origin(currentX, currentY + (mAscent - font.getAscent()));
+			//graphics->DrawString(run->getText().c_str(), -1, font, origin, &run->getFormat(), &brush);
+			const auto sdfText = run->getSdfText();
+			const auto & font = sdfText->getFont();
+			const ci::vec2 origin(currentX, currentY + (mAscent - font.getAscent()));
+			const ci::gl::ScopedColor scopedColor(run->getColor());
+
+			sdfText->drawString(narrowString(run->getText()), origin);
+			currentX += run->getSize().x;
+		}
+	}
+
+	void render(Gdiplus::Graphics * graphics, float currentY, float paddingLeft, float paddingRight, float maxWidth) {
+		float currentX = paddingLeft;
+		if (mTextAlign == TextAlign::Center) {
+			currentX = (maxWidth - mSize.x) * 0.5f;
+		} else if (mTextAlign == TextAlign::Right) {
+			currentX = maxWidth - mSize.x - paddingRight;
+		}
+
+		for (auto run : mRuns) {
 			const ci::ColorA8u nativeColor(run->getColor());
 
-			const Gdiplus::Font * font = run->getFont().getGdiplusFont();
+			//const Gdiplus::Font * font = run->getFont().getGdiplusFont();
 			const Gdiplus::SolidBrush brush(Gdiplus::Color(nativeColor.a, nativeColor.r, nativeColor.g, nativeColor.b));
-			const Gdiplus::PointF origin(currentX, currentY + (mAscent - run->getFont().getAscent()));
-			graphics->DrawString(run->getText().c_str(), -1, font, origin, &run->getFormat(), &brush);
+			//const Gdiplus::PointF origin(currentX, currentY + (mAscent - run->getFont().getAscent()));
+			//graphics->DrawString(run->getText().c_str(), -1, font, origin, &run->getFormat(), &brush);
 			currentX += run->getSize().x;
 		}
 	}
@@ -452,10 +486,11 @@ void StyledTextLayout::appendSegment(const StyledText & segment) {
 		line = addLine(segment.mStyle);
 	}
 
-	const ci::Font& font = FontManager::getInstance()->getFont(segment.mStyle);
+	//const ci::Font& font = FontManager::getInstance()->getFont(segment.mStyle);
+	const ci::gl::SdfTextRef sdfText = FontManager::getInstance()->getText(segment.mStyle);
 	const ci::ColorA& color = segment.mStyle.mColor;
 
-	RunRef run(new Run(font, color));
+	RunRef run = make_shared<Run>(sdfText, color);
 
 	int lastNonWordIndex = -1;
 	int lastWordIndex = 0;
@@ -516,7 +551,7 @@ void StyledTextLayout::appendSegment(const StyledText & segment) {
 
 			// start new line and run
 			line = addLine(segment.mStyle);
-			run = RunRef(new Run(font, color));
+			run = make_shared<Run>(sdfText, color);
 
 			if (!isWhitespace && !isNewline) {
 				// move word to next line
@@ -545,6 +580,22 @@ shared_ptr<Line> StyledTextLayout::addLine(const Style & style) {
 
 bool StyledTextLayout::hasChanges() const {
 	return mHasInvalidLayout || mHasInvalidSize;
+}
+
+void StyledTextLayout::draw() {
+	validateLayout();
+	validateSize();
+
+	// walk the lines and getSurface them, advancing our Y offset along the way
+	ci::ivec2 bitmapSize = getTextSize();
+	float currentY = mPaddingTop;
+
+	for (auto& line : mLines) {
+		currentY += line->getLeadingOffset() + line->getLeading();
+		currentY += line->getAscent();
+		line->render(currentY, mPaddingLeft, mPaddingRight, (float)bitmapSize.x);
+		currentY += line->getDescent();
+	}
 }
 
 ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied, const ci::ColorA8u & clearColor) {

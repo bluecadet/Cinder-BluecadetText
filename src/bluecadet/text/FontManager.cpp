@@ -66,11 +66,11 @@ void FontManager::setup(ci::fs::path jsonPath) {
 	}
 }
 
-ci::Font& FontManager::getFont(Style style, FallbackMode fallbackMode) {
+const ci::gl::SdfText::Font& FontManager::getFont(Style style, FallbackMode fallbackMode) {
 	return getFont(style.mFontFamily, style.mFontSize, style.mFontWeight, style.mFontStyle, fallbackMode);
 }
 
-ci::Font& FontManager::getFont(std::string family, float size, int weight, FontStyle style, FallbackMode fallbackMode) {
+const ci::gl::SdfText::Font& FontManager::getFont(std::string family, float size, int weight, FontStyle style, FallbackMode fallbackMode) {
 	auto weightsIt = mWeightsByFamily.find(family);
 
 	if (weightsIt == mWeightsByFamily.end()) {
@@ -140,7 +140,37 @@ std::string FontManager::getFontPath(StylesByWeight& weights, int targetWeight, 
 	return pathIt->second;
 }
 
-ci::Font& FontManager::getCachedFontByPath(std::string path, float size) {
+ci::gl::SdfTextRef FontManager::getText(Style style, FallbackMode fallbackMode) {
+	return getText(style.mFontFamily, style.mFontSize, style.mFontWeight, style.mFontStyle, fallbackMode);
+}
+
+ci::gl::SdfTextRef FontManager::getText(std::string family, float size, int weight, FontStyle style, FallbackMode fallbackMode) {
+
+	auto weightsIt = mWeightsByFamily.find(family);
+
+	string path = getFontPath(weightsIt->second, weight, style, fallbackMode);
+
+	//cout << "FontManager: Path for family '" << family << "', weight '" << to_string(weight) << "' and style '" << getStringFromStyle(style) << "': '" << path << "'" << endl;
+
+	if (path.empty()) {
+		if (mLogLevel >= LogLevel::Warning) cout << "FontManager: Warning: Can't find font weight '" << to_string(weight) << "' and style '" << getStringFromFontStyle(style) << "' for family '" << family << "'; Returning default font '" << mDefaultName << "'" << endl;
+		return nullptr;
+	}
+
+	auto & font = getCachedFontByPath(path, size);
+
+	auto textIt = mCachedTexts.find(path);
+
+	if (textIt != mCachedTexts.end()) {
+		return textIt->second;
+	}
+
+	auto text = ci::gl::SdfText::create(path + "." + to_string(font.getSize()) + ".sdfcache", font);
+	mCachedTexts[path] = text;
+	return text;
+}
+
+const ci::gl::SdfText::Font & FontManager::getCachedFontByPath(std::string path, float size) {
 	auto& sizeMap = getCachedSizesForFont(path);
 	auto fontIt = sizeMap.find(size);
 
@@ -157,7 +187,7 @@ ci::Font& FontManager::getCachedFontByPath(std::string path, float size) {
 
 		// try creating font
 		try {
-			sizeMap[size] = ci::Font(dataSource, size);
+			sizeMap[size] = ci::gl::SdfText::Font(dataSource, size);
 
 		} catch (Exception e) {
 			if (mLogLevel >= LogLevel::Error) cout << "FontManager: Error: Can't create font from file at '" << path << "'; Returning default font '" << mDefaultName << "'" << endl;
@@ -172,23 +202,23 @@ ci::Font& FontManager::getCachedFontByPath(std::string path, float size) {
 
 }
 
-ci::Font& FontManager::getCachedFontByName(std::string name, float size) {
+const ci::gl::SdfText::Font& FontManager::getCachedFontByName(std::string name, float size) {
 	auto& sizeMap = getCachedSizesForFont(name);
 	auto fontIt = sizeMap.find(size);
 
 	if (fontIt == sizeMap.end()) {
-		sizeMap[size] = ci::Font(mDefaultName, size);
+		sizeMap[size] = ci::gl::SdfText::Font(mDefaultName, size);
 		fontIt = sizeMap.find(size);
 	}
 
 	return fontIt->second;
 }
 
-std::map<float, ci::Font>& FontManager::getCachedSizesForFont(std::string key) {
+std::map<float, ci::gl::SdfText::Font>& FontManager::getCachedSizesForFont(std::string key) {
 	auto sizeMapIt = mCachedFonts.find(key);
 	if (sizeMapIt == mCachedFonts.end()) {
 		// create new map if it doesn't exist yet
-		mCachedFonts[key] = std::map<float, ci::Font>();
+		mCachedFonts[key] = std::map<float, ci::gl::SdfText::Font>();
 		sizeMapIt = mCachedFonts.find(key);
 	}
 	return sizeMapIt->second;

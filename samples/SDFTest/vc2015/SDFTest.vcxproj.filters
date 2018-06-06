@@ -1,0 +1,148 @@
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Blocks">
+      <UniqueIdentifier>{A88E5A1D-FCAF-4986-9E6E-504A862A5500}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\BluecadetText">
+      <UniqueIdentifier>{E04ACE8C-9F1B-4294-AF76-FD5C64175673}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\BluecadetText\src">
+      <UniqueIdentifier>{940AAFFF-0BDF-45F9-8C39-DB629497F6D8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\BluecadetText\src\bluecadet">
+      <UniqueIdentifier>{68F64E15-D2D8-4CED-979D-CF463F153C37}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\BluecadetText\src\bluecadet\text">
+      <UniqueIdentifier>{E7F37DB9-F68D-4F42-A2B2-07F70F7AC708}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\SDFText">
+      <UniqueIdentifier>{49BF94DB-C9B5-4C06-B4D5-853794A893A2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\SDFText\include">
+      <UniqueIdentifier>{BD5339C9-4810-4DEA-ADED-012EF0BCBC18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\SDFText\include\cinder">
+      <UniqueIdentifier>{B8943D54-9626-4543-8140-76D0B3143488}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\SDFText\include\cinder\gl">
+      <UniqueIdentifier>{2713BE8F-DD3A-4EA5-B2ED-643B2B050290}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\SDFText\include\msdfgen">
+      <UniqueIdentifier>{EB25D3FE-68AF-46FB-B4D8-BD6E8376B2E9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Blocks\SDFText\include\msdfgen\core">
+      <UniqueIdentifier>{095C357A-0D4A-4F08-87D2-1C8FDC2826C2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\SDFTestApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\SDFTestApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClInclude Include="..\include\Resources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClCompile Include="..\..\..\src\bluecadet\text\FontManager.cpp">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\bluecadet\text\StyledTextLayout.cpp">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\bluecadet\text\StyledTextParser.cpp">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\src\bluecadet\text\StyleManager.cpp">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClCompile>
+    <ClInclude Include="..\..\..\src\bluecadet\text\FontManager.h">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\bluecadet\text\StyledTextLayout.h">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\bluecadet\text\StyledTextParser.h">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\bluecadet\text\StyleManager.h">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\src\bluecadet\text\Text.h">
+      <Filter>Blocks\BluecadetText\src\bluecadet\text</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\cinder\gl\SdfText.h">
+      <Filter>Blocks\SDFText\include\cinder\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\cinder\gl\SdfTextMesh.h">
+      <Filter>Blocks\SDFText\include\cinder\gl</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\msdfgen.h">
+      <Filter>Blocks\SDFText\include\msdfgen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\util.h">
+      <Filter>Blocks\SDFText\include\msdfgen</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\Bitmap.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\Contour.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\edge-coloring.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\edge-segments.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\EdgeColor.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\EdgeHolder.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\equation-solver.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\render-sdf.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\save-bmp.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\shape-description.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\Shape.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\SignedDistance.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\Cinder-SDFText\include\msdfgen\core\Vector2.h">
+      <Filter>Blocks\SDFText\include\msdfgen\core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\Resources.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

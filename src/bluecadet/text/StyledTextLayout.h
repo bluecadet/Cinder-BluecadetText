@@ -67,6 +67,8 @@ public:
 	//! Removes all text
 	void clearText();
 
+	void draw();
+
 	//! Returns a ci::Surface into which the StyledTextLayout is rendered. If \a useAlpha the ci::Surface will contain an alpha channel. If \a premultiplied the alpha will be premulitplied.
 	ci::Surface renderToSurface(bool useAlpha = true, bool premultiplied = false, const ci::ColorA8u & clearColor = ci::ColorA8u());
 
