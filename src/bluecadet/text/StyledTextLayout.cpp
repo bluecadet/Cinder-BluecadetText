@@ -227,7 +227,7 @@ public:
 		mHasInvalidExtents = false;
 	}
 
-	void render(Gdiplus::Graphics *graphics, float currentY, float paddingLeft, float paddingRight, float maxWidth) {
+	void render(Gdiplus::Graphics * graphics, float currentY, float paddingLeft, float paddingRight, float maxWidth) {
 		float currentX = paddingLeft;
 		if (mTextAlign == TextAlign::Center) {
 			currentX = (maxWidth - mSize.x) * 0.5f;
@@ -237,10 +237,12 @@ public:
 		}
 
 		for (auto run : mRuns) {
-			const Gdiplus::Font *font = run->getFont().getGdiplusFont();
-			ci::ColorA8u nativeColor(run->getColor());
-			Gdiplus::SolidBrush brush(Gdiplus::Color(nativeColor.a, nativeColor.r, nativeColor.g, nativeColor.b));
-			graphics->DrawString(run->getText().c_str(), -1, font, Gdiplus::PointF(currentX, currentY + (mAscent - run->getFont().getAscent())), &run->getFormat(), &brush);
+			const ci::ColorA8u nativeColor(run->getColor());
+
+			const Gdiplus::Font * font = run->getFont().getGdiplusFont();
+			const Gdiplus::SolidBrush brush(Gdiplus::Color(nativeColor.a, nativeColor.r, nativeColor.g, nativeColor.b));
+			const Gdiplus::PointF origin(currentX, currentY + (mAscent - run->getFont().getAscent()));
+			graphics->DrawString(run->getText().c_str(), -1, font, origin, &run->getFormat(), &brush);
 			currentX += run->getSize().x;
 		}
 	}

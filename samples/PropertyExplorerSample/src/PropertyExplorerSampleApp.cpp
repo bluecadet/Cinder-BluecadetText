@@ -96,7 +96,7 @@ void PropertyExplorerSampleApp::setup()
 	mParamLayoutModes.push_back("NoWrap");
 	mParamLayoutModes.push_back("SingleLine");
 
-	mParams = ci::params::InterfaceGl::create("Settings", ivec2(400, 400), ColorA(0, 0, 0, 0.7f));
+	mParams = ci::params::InterfaceGl::create("Settings", toPixels(ivec2(400, 400)), ColorA(0, 0, 0, 0.7f));
 	mParams->addParam("Text", &mLoremIpsum).updateFn([&] { updateText(); });
 	mParams->addButton("Reload", [&] { loadText(); updateText(); });
 	mParams->addSeparator();
@@ -180,7 +180,7 @@ void PropertyExplorerSampleApp::resize() {
 
 	updateText();
 	
-	ivec2 paramsPos = getWindowSize() - mParams->getSize() - ivec2(16);
+	ivec2 paramsPos = toPixels(getWindowSize()) - mParams->getSize() - ivec2(16);
 	if (paramsPos.x < 0) paramsPos.x = 0;
 	if (paramsPos.y < 0) paramsPos.y = 0;
 	mParams->setPosition(paramsPos);
@@ -190,5 +190,6 @@ CINDER_APP(PropertyExplorerSampleApp,
 	RendererGl(RendererGl::Options().msaa(4)),
 	[&](ci::app::App::Settings *settings)
 {
+	settings->setHighDensityDisplayEnabled(true);
 	settings->setWindowSize(900, 640);
 })
