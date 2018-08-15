@@ -34,6 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "cinder/Noncopyable.h"
 #include "cinder/Font.h"
 #include "cinder/Vector.h"
+#include "cinder/Log.h"
 
 #if !defined(CINDER_MSW)
 
@@ -128,7 +129,8 @@ public:
 	}
 	~Run() {};
 
-	const ci::vec2 &				getSize() { calcExtents(); return mSize; };
+	//const ci::vec2 &				getSize() { calcExtents(); return mSize; };
+	const ci::Rectf &				getBounds() { calcExtents(); return mBounds; }
 	const StringType &				getText() const { return mWideText; }
 	const ci::ColorA &				getColor() const { return mColor; }
 	//const ci::gl::SdfText::Font &	getFont() const { return mFont; }
@@ -152,14 +154,17 @@ protected:
 		}
 
 		// Important: explicitly enable kerning for character range
-		auto range = Gdiplus::CharacterRange(0, (int)mWideText.length());
-		mFormat.SetMeasurableCharacterRanges(1, &range);
+		//auto range = Gdiplus::CharacterRange(0, (int)mWideText.length());
+		//mFormat.SetMeasurableCharacterRanges(1, &range);
 
 		//Gdiplus::RectF sizeRect;
 		//DeviceContextManager::instance()->getGraphics().MeasureString(mWideText.c_str(), -1, mFont.getGdiplusFont(), Gdiplus::PointF(0, 0), &mFormat, &sizeRect);
 		//mSize.x = sizeRect.Width;
 		//mSize.y = sizeRect.Height;
-		mSize = mSdfText->measureString(bluecadet::text::narrowString(mWideText));
+
+		//mSize = mSdfText->measureString(bluecadet::text::narrowString(mWideText)); // BB: Why no whitespace?
+		mBounds = mSdfText->measureStringBounds(bluecadet::text::narrowString(mWideText));
+		//mSize = mBounds.getSize();
 		mHasInvalidExtents = false;
 	}
 
@@ -169,7 +174,8 @@ protected:
 	ci::gl::SdfTextRef		mSdfText;
 	ci::ColorA				mColor;
 	StringType				mWideText;
-	ci::vec2				mSize;
+	//ci::vec2				mSize;
+	ci::Rectf				mBounds;
 
 	// SDF temp
 	static std::map<std::string, ci::gl::SdfText::Font> sSdfFontCache;
@@ -216,21 +222,24 @@ public:
 		mSize.x = mSize.y = mAscent = mDescent = mLeading = 0.0f;
 
 		for (auto run : mRuns) {
-			mSize.x += run->getSize().x;
+			mSize.x += run->getBounds().getLowerRight().x;
 			const auto & font = run->getSdfText()->getFont();
-
-			mAscent = std::max(font.getAscent(), mAscent);
-			mDescent = std::max(font.getDescent(), mDescent);
+			//CI_LOG_I(font.getName() + " - " + to_string(font.getSize()) + " - " + to_string(font.getAscent()) + " - " + to_string(font.getDescent()) + " - " + to_string(font.getLeading()));
+			//const auto & scale = 1.0f / run->getSdfText()->getFormat().getSdfScale();
+			const float scale = font.getSize() / 32.0f;
+			//const float scale = 1.0f;
+			mAscent = std::max(font.getAscent() * scale, mAscent);
+			mDescent = std::max(font.getDescent() * scale, mDescent);
 
 			if (mLeadingDisabled) {
 				//mLeading = 1.0f; // seems necessary to correctly measure layout when using a typographic format
 				mLeading = 0.0f;
 			}
 			else {
-				mLeading = std::max(font.getLeading(), mLeading);
+				mLeading = std::max(font.getLeading() * scale, mLeading);
 			}
 
-			mSize.y = std::max(mSize.y, run->getSize().y);
+			mSize.y = std::max(mSize.y, run->getBounds().getLowerRight().y);
 		}
 
 		mSize.y = std::max(mSize.y, mAscent + mDescent + mLeading);
@@ -254,11 +263,15 @@ public:
 			//graphics->DrawString(run->getText().c_str(), -1, font, origin, &run->getFormat(), &brush);
 			const auto sdfText = run->getSdfText();
 			const auto & font = sdfText->getFont();
-			const ci::vec2 origin(currentX, currentY + (mAscent - font.getAscent()));
+			//const auto & scale = 1.0f / sdfText->getFormat().getSdfScale(); // BB: Should this be a property on the font?
+			const float scale = font.getSize() / 32.0f; // BB: Should this be a property on the font?
+			//const float scale = 1.0f; // BB: Should this be a property on the font?
+			const ci::vec2 origin(currentX, currentY + (mAscent - font.getAscent() * scale)); // BB: This seems to mess with vertical alignment within the line; Should getAscent() be multiplied with scale?
+			//const ci::vec2 origin(currentX, currentY); // BB: This seems to mess with vertical alignment within the line; Should getAscent() be multiplied with scale?
 			const ci::gl::ScopedColor scopedColor(run->getColor());
 
-			sdfText->drawString(narrowString(run->getText()), origin);
-			currentX += run->getSize().x;
+			sdfText->drawString(narrowString(run->getText()), origin); // BB: Why no whitespace?
+			currentX += run->getBounds().getLowerRight().x;
 		}
 	}
 
@@ -277,7 +290,7 @@ public:
 			const Gdiplus::SolidBrush brush(Gdiplus::Color(nativeColor.a, nativeColor.r, nativeColor.g, nativeColor.b));
 			//const Gdiplus::PointF origin(currentX, currentY + (mAscent - run->getFont().getAscent()));
 			//graphics->DrawString(run->getText().c_str(), -1, font, origin, &run->getFormat(), &brush);
-			currentX += run->getSize().x;
+			currentX += run->getBounds().getLowerRight().x;
 		}
 	}
 
@@ -537,7 +550,7 @@ void StyledTextLayout::appendSegment(const StyledText & segment) {
 			run->append(token);
 		}
 
-		const float lineWidth = line->getSize().x + run->getSize().x;
+		const float lineWidth = line->getSize().x + run->getBounds().getLowerRight().x;
 
 		// check if line is too wide, but only if the current word is not the only word on the line
 		const bool isFirstWordOnLine = line->getRuns().empty() && prevRunTextLength == 0;

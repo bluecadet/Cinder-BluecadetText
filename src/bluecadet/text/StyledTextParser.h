@@ -43,7 +43,7 @@ public:
 protected:
 	std::vector<text::StringType> splitStringIntoTokens(text::StringType str);
 
-	int mDefaultOptions;
+	int mDefaultOptions = 0;
 };
 
 }

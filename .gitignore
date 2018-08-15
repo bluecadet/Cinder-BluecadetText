@@ -3,6 +3,9 @@
 *.user
 *.sln.docstates
 
+# SDF cache files
+*.sdfcache
+
 # Build results
 
 **/vc201[35]/**/[Dd]ebug/

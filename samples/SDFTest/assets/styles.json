@@ -9,10 +9,6 @@
 		"color": "#ffffff",
 		"leadingOffset": 0,
 		
-		"testingNodeID": {
-			"fontSize": 50.0
-		},
-
 		"test": {
 			"title": {
 				"textAlign": "center",

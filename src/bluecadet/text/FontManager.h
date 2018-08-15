@@ -47,8 +47,8 @@ public:
 	const ci::gl::SdfText::Font & getFont(Style style, FallbackMode fallbackMode = Adaptive);
 	const ci::gl::SdfText::Font & getFont(std::string family, float size, int weight = Regular, FontStyle style = Normal, FallbackMode fallbackMode = Adaptive);
 
-	const ci::gl::SdfText::Font & getCachedFontByPath(std::string path, float size);
-	const ci::gl::SdfText::Font & getCachedFontByName(std::string name, float size);
+	const ci::gl::SdfText::Font & getCachedFontByPath(const std::string & path, const std::string & family, float size);
+	const ci::gl::SdfText::Font & getCachedFontByName(const std::string & name, float size);
 
 	ci::gl::SdfTextRef getText(Style style, FallbackMode fallbackMode = Adaptive);
 	ci::gl::SdfTextRef getText(std::string family, float size, int weight = Regular, FontStyle style = Normal, FallbackMode fallbackMode = Adaptive);
@@ -81,12 +81,12 @@ protected:
 	StylesByWeight::iterator getFallbackWeight(StylesByWeight& weights, int targetWeight, FontStyle style, FallbackMode fallbackMode);
 
 	//! Get the font sizes map for a key (either font path or font name)
-	std::map<float, ci::gl::SdfText::Font>& getCachedSizesForFont(std::string key);
+	//std::map<float, ci::gl::SdfText::Font>& getCachedSizesForFont(std::string key);
 
 protected:
 	WeightsByFamily mWeightsByFamily;
 	std::map<std::string, std::map<float, ci::gl::SdfText::Font>> mCachedFonts;
-	std::map<std::string, ci::gl::SdfTextRef> mCachedTexts;
+	std::map<std::string, std::map<float, ci::gl::SdfTextRef>> mCachedTexts;
 
 	std::string mDefaultName;
 	FontStyle mDefaultStyle;
