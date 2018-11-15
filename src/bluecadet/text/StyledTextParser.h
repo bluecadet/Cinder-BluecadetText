@@ -6,6 +6,7 @@
 #include <stack>
 
 #include "Text.h"
+#include "TokenParser.h"
 
 namespace bluecadet {
 namespace text {
@@ -15,7 +16,6 @@ typedef std::shared_ptr<class StyledTextParser> StyledTextParserRef;
 class StyledTextParser {
 
 public:
-
 	enum OptionFlags {
 		INVERT_NESTED_ITALICS = 0x1 << 0,
 		STRIP_PARAGRAPH_TAG = 0x1 << 1,
@@ -35,7 +35,7 @@ public:
 	~StyledTextParser();
 
 	std::vector<StyledText> parse(const text::StringType& str, Style baseStyle);
-	std::vector<StyledText> parse(const text::StringType& str, Style baseStyle, int options);
+	std::vector<StyledText> parse(const text::StringType& str, Style baseStyle, int options, const TokenParserMapRef customTokenParsers = nullptr);
 
 	int getDefaultOptions() const { return mDefaultOptions; }
 	void setDefaultOptions(const int value) { mDefaultOptions = value; }
@@ -44,6 +44,7 @@ protected:
 	std::vector<text::StringType> splitStringIntoTokens(text::StringType str);
 
 	int mDefaultOptions;
+	TokenParserMap mDefaultTokenParsers;
 };
 
 }
