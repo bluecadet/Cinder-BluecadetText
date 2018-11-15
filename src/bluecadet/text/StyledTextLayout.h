@@ -33,6 +33,7 @@
 #include <string>
 
 #include "Text.h"
+#include "TokenParser.h"
 
 namespace bluecadet {
 namespace text {
@@ -75,18 +76,18 @@ public:
 
 
 	//! Replaces the current text and keeps the current style. Parses supported style tags.
-	void setText(const std::string & text);
+	void setText(const std::string & text, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Replaces the current text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void setText(const std::string & text, const std::string styleName);
+	void setText(const std::string & text, const std::string styleName, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Replaces the current text and and sets the current style. Parses supported style tags.
-	void setText(const std::string & text, const Style& style);
+	void setText(const std::string & text, const Style& style, const TokenParserMapRef customTokenParsers = nullptr);
 
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Parses supported style tags.
-	void appendText(const std::string & text);
+	void appendText(const std::string & text, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void appendText(const std::string & text, const std::string & styleName, bool saveAsCurrentStyle = false);
+	void appendText(const std::string & text, const std::string & styleName, bool saveAsCurrentStyle = false, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Appends text to any existing text and and sets the current style. Parses supported style tags.
-	void appendText(const std::string & text, const Style& style, bool saveAsCurrentStyle = false);
+	void appendText(const std::string & text, const Style& style, bool saveAsCurrentStyle = false, const TokenParserMapRef customTokenParsers = nullptr);
 
 	//! Replaces the current text with plain text and keeps the current style. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
 	void setPlainText(const std::string & text);
@@ -104,18 +105,18 @@ public:
 
 
 	//! Replaces the current text and keeps the current style. Parses supported style tags.
-	void setText(const std::wstring & text);
+	void setText(const std::wstring & text, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Replaces the current text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void setText(const std::wstring & text, const std::string styleName);
+	void setText(const std::wstring & text, const std::string styleName, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Replaces the current text and and sets the current style. Parses supported style tags.
-	void setText(const std::wstring & text, const Style& style);
+	void setText(const std::wstring & text, const Style& style, const TokenParserMapRef customTokenParsers = nullptr);
 
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Parses supported style tags.
-	void appendText(const std::wstring & text);
+	void appendText(const std::wstring & text, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void appendText(const std::wstring & text, const std::string & styleName, bool saveAsCurrentStyle = false);
+	void appendText(const std::wstring & text, const std::string & styleName, bool saveAsCurrentStyle = false, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Appends text to any existing text and and sets the current style. Parses supported style tags.
-	void appendText(const std::wstring & text, const Style& style, bool saveAsCurrentStyle = false);
+	void appendText(const std::wstring & text, const Style& style, bool saveAsCurrentStyle = false, const TokenParserMapRef customTokenParsers = nullptr);
 
 	//! Replaces the current text with plain text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
 	void setPlainText(const std::wstring & text);

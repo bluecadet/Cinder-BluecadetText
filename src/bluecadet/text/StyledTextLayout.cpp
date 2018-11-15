@@ -79,8 +79,7 @@ class DeviceContextManager : private ci::Noncopyable {
 public:
 	DeviceContextManager() :
 		mDummyDC(::CreateCompatibleDC(0)),
-		mGraphics(mDummyDC)
-	{
+		mGraphics(mDummyDC) {
 	}
 	~DeviceContextManager() {
 		::DeleteDC(mDummyDC);
@@ -182,8 +181,8 @@ public:
 		mLeadingOffset(aLeadingOffset),
 		mLeadingDisabled(aLeadingDisabled),
 		mSize(0, 0), mAscent(0), mDescent(0), mLeading(0),
-		mHasInvalidExtents(false)
-	{}
+		mHasInvalidExtents(false) {
+	}
 	~Line() {}
 
 	const ci::vec2&			getSize() { calcExtents(); return mSize; }
@@ -215,8 +214,7 @@ public:
 			if (mLeadingDisabled) {
 				//mLeading = 1.0f; // seems necessary to correctly measure layout when using a typographic format
 				mLeading = 0.0f;
-			}
-			else {
+			} else {
 				mLeading = std::max(run->getFont().getLeading(), mLeading);
 			}
 
@@ -231,8 +229,7 @@ public:
 		float currentX = paddingLeft;
 		if (mTextAlign == TextAlign::Center) {
 			currentX = (maxWidth - mSize.x) * 0.5f;
-		}
-		else if (mTextAlign == TextAlign::Right) {
+		} else if (mTextAlign == TextAlign::Right) {
 			currentX = maxWidth - mSize.x - paddingRight;
 		}
 
@@ -274,8 +271,7 @@ StyledTextLayout::StyledTextLayout() :
 	mHasInvalidSize(false),
 	mHasInvalidLayout(false),
 	mSizeTrimmingEnabled(false),
-	mTextSize(0, 0)
-{
+	mTextSize(0, 0) {
 	// forces any globals we need to be initialized, particularly GDI+ on Windows
 	DeviceContextManager::instance();
 
@@ -303,21 +299,21 @@ void StyledTextLayout::clearText() {
 }
 
 
-void StyledTextLayout::setText(const wstring & text) { clearText(); appendText(text); }
-void StyledTextLayout::setText(const wstring & text, const string styleName) { clearText(); appendText(text, styleName, true); }
-void StyledTextLayout::setText(const wstring & text, const Style& style) { clearText(); appendText(text, style, true); }
+void StyledTextLayout::setText(const wstring & text, const StyledTextParser::TokenParserMapRef customTokenParsers) { clearText(); appendText(text, customTokenParsers); }
+void StyledTextLayout::setText(const wstring & text, const string styleName, const StyledTextParser::TokenParserMapRef customTokenParsers) { clearText(); appendText(text, styleName, true, customTokenParsers); }
+void StyledTextLayout::setText(const wstring & text, const Style& style, const StyledTextParser::TokenParserMapRef customTokenParsers) { clearText(); appendText(text, style, true, customTokenParsers); }
 
-void StyledTextLayout::appendText(const wstring & text) {
-	appendSegments(StyledTextParser::getInstance()->parse(text, mCurrentStyle, mParseOptions));
+void StyledTextLayout::appendText(const wstring & text, const StyledTextParser::TokenParserMapRef customTokenParsers) {
+	appendSegments(StyledTextParser::getInstance()->parse(text, mCurrentStyle, mParseOptions, customTokenParsers));
 }
-void StyledTextLayout::appendText(const wstring & text, const string & styleName, bool saveAsCurrentStyle) {
+void StyledTextLayout::appendText(const wstring & text, const string & styleName, bool saveAsCurrentStyle, const StyledTextParser::TokenParserMapRef customTokenParsers) {
 	Style style = StyleManager::getInstance()->getStyle(styleName);
 	if (saveAsCurrentStyle) setCurrentStyle(style);
-	appendSegments(StyledTextParser::getInstance()->parse(text, style, mParseOptions));
+	appendSegments(StyledTextParser::getInstance()->parse(text, style, mParseOptions, customTokenParsers));
 }
-void StyledTextLayout::appendText(const wstring & text, const Style& style, bool saveAsCurrentStyle) {
+void StyledTextLayout::appendText(const wstring & text, const Style& style, bool saveAsCurrentStyle, const StyledTextParser::TokenParserMapRef customTokenParsers) {
 	if (saveAsCurrentStyle) setCurrentStyle(style);
-	appendSegments(StyledTextParser::getInstance()->parse(text, style, mParseOptions));
+	appendSegments(StyledTextParser::getInstance()->parse(text, style, mParseOptions, customTokenParsers));
 }
 
 void StyledTextLayout::setPlainText(const wstring & text) { clearText(); appendPlainText(text); }
@@ -339,13 +335,13 @@ void StyledTextLayout::appendPlainText(const wstring & text, const Style& style,
 
 
 // std::string helpers to convert to widestring
-void StyledTextLayout::setText(const string & text) { setText(wideString(text)); }
-void StyledTextLayout::setText(const string & text, const string styleName) { setText(wideString(text), styleName); }
-void StyledTextLayout::setText(const string & text, const Style& style) { setText(wideString(text), style); }
+void StyledTextLayout::setText(const string & text, const StyledTextParser::TokenParserMapRef customTokenParsers) { setText(wideString(text), customTokenParsers); }
+void StyledTextLayout::setText(const string & text, const string styleName, const StyledTextParser::TokenParserMapRef customTokenParsers) { setText(wideString(text), styleName, customTokenParsers); }
+void StyledTextLayout::setText(const string & text, const Style& style, const StyledTextParser::TokenParserMapRef customTokenParsers) { setText(wideString(text), style, customTokenParsers); }
 
-void StyledTextLayout::appendText(const string & text) { appendText(wideString(text)); }
-void StyledTextLayout::appendText(const string & text, const string & styleName, bool saveAsCurrentStyle) { appendText(wideString(text), styleName, saveAsCurrentStyle); }
-void StyledTextLayout::appendText(const string & text, const Style& style, bool saveAsCurrentStyle) { appendText(wideString(text), style, saveAsCurrentStyle); }
+void StyledTextLayout::appendText(const string & text, const StyledTextParser::TokenParserMapRef customTokenParsers) { appendText(wideString(text), customTokenParsers); }
+void StyledTextLayout::appendText(const string & text, const string & styleName, bool saveAsCurrentStyle, const StyledTextParser::TokenParserMapRef customTokenParsers) { appendText(wideString(text), styleName, saveAsCurrentStyle, customTokenParsers); }
+void StyledTextLayout::appendText(const string & text, const Style& style, bool saveAsCurrentStyle, const StyledTextParser::TokenParserMapRef customTokenParsers) { appendText(wideString(text), style, saveAsCurrentStyle, customTokenParsers); }
 
 void StyledTextLayout::setPlainText(const string & text) { setPlainText(wideString(text)); }
 void StyledTextLayout::setPlainText(const string & text, const string styleName) { setPlainText(wideString(text), styleName); }
