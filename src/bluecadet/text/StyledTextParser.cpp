@@ -27,7 +27,6 @@ StyledTextParser::StyledTextParser() {
 			const bool shouldInvert = (options & INVERT_NESTED_ITALICS) && (styles.top().mFontStyle == FontStyle::Italic);
 			Style style = Style(styles.top()).fontStyle(shouldInvert ? FontStyle::Normal : FontStyle::Italic);
 			styles.push(style);
-
 		};
 
 		mDefaultTokenParsers[L"<i>"] = tokenParser;
@@ -39,7 +38,6 @@ StyledTextParser::StyledTextParser() {
 		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			Style style = Style(styles.top()).fontWeight(FontWeight::Bold);
 			styles.push(style);
-
 		};
 
 		mDefaultTokenParsers[L"<b>"] = tokenParser;
@@ -50,7 +48,6 @@ StyledTextParser::StyledTextParser() {
 		// Remove styles from stack when tag is closed
 		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			if (!styles.empty()) styles.pop();
-
 		};
 
 		mDefaultTokenParsers[L"</i>"] = tokenParser;
@@ -97,7 +94,8 @@ StyledTextParser::StyledTextParser() {
 		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			token = L"<";
 			StyledText segment(styles.top(), token);
-			segments.push_back(segment);		};
+			segments.push_back(segment);
+		};
 
 		mDefaultTokenParsers[L"&lt;"] = tokenParser;
 	}
@@ -107,7 +105,8 @@ StyledTextParser::StyledTextParser() {
 		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			token = L">";
 			StyledText segment(styles.top(), token);
-			segments.push_back(segment);		};
+			segments.push_back(segment);
+		};
 
 		mDefaultTokenParsers[L"&gt;"] = tokenParser;
 	}
