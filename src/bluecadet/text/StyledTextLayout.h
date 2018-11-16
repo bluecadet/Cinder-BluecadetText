@@ -33,7 +33,6 @@
 #include <string>
 
 #include "Text.h"
-#include "TokenParser.h"
 
 namespace bluecadet {
 namespace text {

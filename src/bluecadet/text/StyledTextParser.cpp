@@ -14,8 +14,7 @@ StyledTextParser::StyledTextParser() {
 	// Construct default token parsers
 	{
 		// root
-		TokenParser tokenParser = [](StringType &token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
-			return false;
+		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 		};
 
 		mDefaultTokenParsers[L"<root>"] = tokenParser;
@@ -24,12 +23,11 @@ StyledTextParser::StyledTextParser() {
 
 	{
 		// Italic
-		TokenParser tokenParser = [](StringType &token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
+		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			const bool shouldInvert = (options & INVERT_NESTED_ITALICS) && (styles.top().mFontStyle == FontStyle::Italic);
 			Style style = Style(styles.top()).fontStyle(shouldInvert ? FontStyle::Normal : FontStyle::Italic);
 			styles.push(style);
 
-			return false;
 		};
 
 		mDefaultTokenParsers[L"<i>"] = tokenParser;
@@ -38,11 +36,10 @@ StyledTextParser::StyledTextParser() {
 
 	{
 		// Bold
-		TokenParser tokenParser = [](StringType &token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
+		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			Style style = Style(styles.top()).fontWeight(FontWeight::Bold);
 			styles.push(style);
 
-			return false;
 		};
 
 		mDefaultTokenParsers[L"<b>"] = tokenParser;
@@ -51,10 +48,9 @@ StyledTextParser::StyledTextParser() {
 
 	{
 		// Remove styles from stack when tag is closed
-		TokenParser tokenParser = [](StringType &token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
+		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			if (!styles.empty()) styles.pop();
 
-			return false;
 		};
 
 		mDefaultTokenParsers[L"</i>"] = tokenParser;
@@ -65,12 +61,13 @@ StyledTextParser::StyledTextParser() {
 
 	{
 		// Break
-		TokenParser tokenParser = [](StringType &token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
+		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			if (options & STRIP_BREAK_TAGS) {
-				return false;
+				return;
 			} else {
 				token = L"\n";
-				return true;
+				StyledText segment(styles.top(), token);
+				segments.push_back(segment);
 			}
 		};
 
@@ -81,12 +78,13 @@ StyledTextParser::StyledTextParser() {
 
 	{
 		// Paragraph
-		TokenParser tokenParser = [](StringType &token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
+		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			if (options & STRIP_PARAGRAPH_TAG) {
-				return false;
+				return;
 			} else {
 				token = L"\n";
-				return true;
+				StyledText segment(styles.top(), token);
+				segments.push_back(segment);
 			}
 		};
 
@@ -96,31 +94,32 @@ StyledTextParser::StyledTextParser() {
 
 	{
 		// Angled bracket
-		TokenParser tokenParser = [](StringType &token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
+		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			token = L"<";
-			return true;
-		};
+			StyledText segment(styles.top(), token);
+			segments.push_back(segment);		};
 
 		mDefaultTokenParsers[L"&lt;"] = tokenParser;
 	}
 
 	{
 		// Angled bracket
-		TokenParser tokenParser = [](StringType &token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
+		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			token = L">";
-			return true;
-		};
+			StyledText segment(styles.top(), token);
+			segments.push_back(segment);		};
 
 		mDefaultTokenParsers[L"&gt;"] = tokenParser;
 	}
 
 	{
 		// Link break
-		TokenParser tokenParser = [](StringType &token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
+		TokenParserFn tokenParser = [](StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles) {
 			if (options & TRIM_LEADING_BREAKS && segments.empty()) {
-				return false;
+				return;
 			} else {
-				return true;
+				StyledText segment(styles.top(), token);
+				segments.push_back(segment);
 			}
 		};
 
@@ -150,28 +149,25 @@ std::vector<StyledText> StyledTextParser::parse(const StringType& str, Style bas
 			// Lowercase tag for consistent tag checks
 			const auto tag = boost::to_lower_copy(token);
 
-			if (customTokenParsers != nullptr
-				&& customTokenParsers->count(tag) > 0) {
-				if (customTokenParsers->at(tag)(token, options, segments, styles) == true) {
-					if (mDefaultTokenParsers.count(tag) > 0) {
-						if (mDefaultTokenParsers[tag](token, options, segments, styles) == true) {
-							StyledText segment(styles.top(), token);
-							segments.push_back(segment);
-						};
-					} else {
-						StyledText segment(styles.top(), token);
-						segments.push_back(segment);
-					}
-				};
-			} else	if (mDefaultTokenParsers.count(tag) > 0) {
-				if (mDefaultTokenParsers[tag](token, options, segments, styles) == true) {
-					StyledText segment(styles.top(), token);
-					segments.push_back(segment);
-				};
-			} else {
-				StyledText segment(styles.top(), token);
-				segments.push_back(segment);
+			// If has macthing custom parser, use it to parse token
+			if (customTokenParsers != nullptr) {
+				const auto iter = customTokenParsers->find(tag);
+				if (iter != customTokenParsers->end()) {
+					iter->second(token, options, segments, styles);
+					continue;
+				}
 			}
+
+			// Else, if has matching default parser, use it to parse token
+			const auto iter = mDefaultTokenParsers.find(tag);
+			if (iter != mDefaultTokenParsers.end()) {
+				iter->second(token, options, segments, styles);
+				continue;
+			}
+
+			// Else, use current style to parse token, and add it to segments
+			StyledText segment(styles.top(), token);
+			segments.push_back(segment);
 		}
 
 		if (options & TRIM_TRAILING_BREAKS) {

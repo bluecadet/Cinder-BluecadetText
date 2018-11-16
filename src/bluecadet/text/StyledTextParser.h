@@ -6,7 +6,6 @@
 #include <stack>
 
 #include "Text.h"
-#include "TokenParser.h"
 
 namespace bluecadet {
 namespace text {
@@ -16,6 +15,7 @@ typedef std::shared_ptr<class StyledTextParser> StyledTextParserRef;
 class StyledTextParser {
 
 public:
+
 	enum OptionFlags {
 		INVERT_NESTED_ITALICS = 0x1 << 0,
 		STRIP_PARAGRAPH_TAG = 0x1 << 1,
