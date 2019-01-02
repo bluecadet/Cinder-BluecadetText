@@ -259,6 +259,10 @@ template <typename CharType>	inline CharType isPunct(const CharType& c) {}
 template <>						inline char isPunct<char>(const char& c) { return std::ispunct(c); }
 template <>						inline wchar_t isPunct<wchar_t>(const wchar_t& c) { return std::ispunct(c); }
 
+template <typename CharType>	inline CharType isSpace(const CharType& c) {}
+template <>						inline char isSpace<char>(const char& c) { return std::isspace(c); }
+template <>						inline wchar_t isSpace<wchar_t>(const wchar_t& c) { return std::iswspace(c); }
+
 template <typename CharType>	inline CharType toUpper(const CharType& c) {}
 template <>						inline char toUpper<char>(const char& c) { return std::toupper(c); }
 template <>						inline wchar_t toUpper<wchar_t>(const wchar_t& c) { return std::towupper(c); }

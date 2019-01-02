@@ -475,18 +475,17 @@ void StyledTextLayout::appendSegment(const StyledText & segment) {
 	}
 
 	//const auto untransformedText = segment.mWText.empty() ? text::wideString(segment.mText) : segment.mWText;
-	const auto untransformedText = segment.mWText;
-	const auto wideText = text::transform(untransformedText, segment.mStyle.mTextTransform);
-	const auto delimiters = text::wideString(" \n");
-	const auto tokens = tokenize(wideText, delimiters);
-
+	const StringType untransformedText = segment.mWText;
+	const StringType wideText = text::transform(untransformedText, segment.mStyle.mTextTransform);
+	const StringType delimiters = text::wideString(" \n\t");
+	const auto tokens = text::tokenize(wideText, delimiters);
 
 	for (const auto& token : tokens) {
 		if (token.empty()) continue;
 
 		const CharType c = token.at(0);
 		const bool isNewline = c == cNewline;
-		const bool isWhitespace = c == cWhitespace || c == cTab;
+		const bool isWhitespace = text::isSpace(c);
 
 		// strip line breaks
 		if (shouldStripBreaks && isNewline) {
