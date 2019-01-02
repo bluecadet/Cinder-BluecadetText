@@ -4,6 +4,8 @@
 
 #include <codecvt>
 #include <string>
+#include <stack>
+#include <map>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
@@ -290,6 +292,16 @@ inline std::string narrowString(const std::u16string& wide_utf16_source_string) 
 	static std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> converter;
 	return converter.to_bytes(wide_utf16_source_string);
 }
+
+//==================================================
+// Token parser definition used by StyledTextParser
+//
+
+// Define token parsers according to this signature. Process token. Modify segments or styles if needed.
+typedef std::function<void(StringType token, const int options, std::vector<StyledText> &segments, std::stack<Style> &styles)> TokenParserFn;
+
+typedef std::map<std::wstring, TokenParserFn> TokenParserMap;
+typedef std::shared_ptr<TokenParserMap> TokenParserMapRef;
 
 }
 }
