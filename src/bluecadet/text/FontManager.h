@@ -25,9 +25,8 @@ public:
 
 	enum LogLevel { Off = 0, Error = 1, Warning = 2, Info = 3 };
 
-	static FontManagerRef getInstance() {
-		static FontManagerRef instance = nullptr;
-		if (!instance) instance = FontManagerRef(new FontManager());
+	static FontManagerRef get() {
+		static auto instance = std::make_shared<FontManager>();
 		return instance;
 	}
 
