@@ -15,9 +15,8 @@ class StyleManager {
 
 public:
 
-	static StyleManagerRef getInstance() {
-		static StyleManagerRef instance = nullptr;
-		if (!instance) instance = StyleManagerRef(new StyleManager());
+	static StyleManagerRef get() {
+		static auto instance = std::make_shared<StyleManager>();
 		return instance;
 	}
 
