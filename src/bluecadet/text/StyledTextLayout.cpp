@@ -79,8 +79,16 @@ class DeviceContextManager : private ci::Noncopyable {
 public:
 	DeviceContextManager() :
 		mDummyDC(::CreateCompatibleDC(0)),
-		mGraphics(mDummyDC)
+		mGraphics(mDummyDC),
+		mStringFormat(Gdiplus::StringFormat::GenericTypographic())
 	{
+		int flags = 0;
+		flags |= Gdiplus::StringFormatFlagsMeasureTrailingSpaces;	// Important when calculating layout of multiple runs
+		flags |= Gdiplus::StringFormatFlagsNoClip;					// Don't clip words
+		flags |= Gdiplus::StringFormatFlagsNoFitBlackBox;			// Don't try to compress and fit (only applies when passing a rect)
+		mStringFormat.SetFormatFlags(flags);
+		mStringFormat.SetAlignment(Gdiplus::StringAlignmentNear);
+		mStringFormat.SetLineAlignment(Gdiplus::StringAlignmentNear);
 	}
 	~DeviceContextManager() {
 		::DeleteDC(mDummyDC);
@@ -90,12 +98,15 @@ public:
 		if (!instance) instance = new DeviceContextManager();
 		return instance;
 	}
-	const HDC&					getDc() { return mDummyDC; }
-	const Gdiplus::Graphics&	getGraphics() { return mGraphics; }
+	const HDC &						getDc() { return mDummyDC; }
+	const Gdiplus::Graphics &		getGraphics() { return mGraphics; }
+	Gdiplus::StringFormat &			getStringFormat() { return mStringFormat; }
+
 
 private:
-	HDC					mDummyDC;
-	Gdiplus::Graphics	mGraphics;
+	HDC						mDummyDC;
+	Gdiplus::Graphics		mGraphics;
+	Gdiplus::StringFormat	mStringFormat;
 };
 
 
@@ -103,158 +114,87 @@ private:
 // Run Helper
 //
 
-// We have to use a shared pointer (or pointers that is) to support non-copyable Gdiplus::StringFormat
-typedef shared_ptr<class Run> RunRef;
+StyledTextLayout::Run::Run(Style style, const ci::Font & aFont, const ci::ColorA & aColor) :
+	mStyle(style),
+	mFont(aFont),
+	mColor(aColor),
+	mHasInvalidExtents(true) {
+}
+StyledTextLayout::Run::~Run() {};
 
-class Run {
-public:
-	Run(const ci::Font & aFont, const ci::ColorA & aColor) :
-		mFont(aFont),
-		mColor(aColor),
-		mHasInvalidExtents(true),
-		mFormat(Gdiplus::StringFormat::GenericTypographic())	// trims and measures string correctly
-		//mFormat(Gdiplus::StringFormat::GenericDefault())		// adds 1/6em left/right padding
-	{
-		mFormat.SetAlignment(Gdiplus::StringAlignmentNear);
-		mFormat.SetLineAlignment(Gdiplus::StringAlignmentNear);
+void StyledTextLayout::Run::append(const StringType & text) {
+	mWideText.append(text);
+	mHasInvalidExtents = true;
+}
 
-		int flags = 0;
-		flags |= Gdiplus::StringFormatFlagsMeasureTrailingSpaces;	// Important when calculating layout of multiple runs
-		flags |= Gdiplus::StringFormatFlagsNoClip;					// Don't clip words
-		flags |= Gdiplus::StringFormatFlagsNoFitBlackBox;			// Don't try to compress and fit (only applies when passing a rect)
-		mFormat.SetFormatFlags(flags);
-	}
-	~Run() {};
+void StyledTextLayout::Run::setText(const StringType & text) {
+	mWideText = text;
+	mHasInvalidExtents = true;
+}
 
-	const ci::vec2 &				getSize() { calcExtents(); return mSize; };
-	const StringType &				getText() const { return mWideText; }
-	const ci::ColorA &				getColor() const { return mColor; }
-	const ci::Font &				getFont() const { return mFont; }
-	const Gdiplus::StringFormat &	getFormat() const { return mFormat; }
-
-	void append(const StringType & text) {
-		mWideText.append(text);
-		mHasInvalidExtents = true;
+void StyledTextLayout::Run::calcExtents() {
+	if (!mHasInvalidExtents) {
+		return;
 	}
 
-	void setText(const StringType & text) {
-		mWideText = text;
-		mHasInvalidExtents = true;
-	}
+	// Important: explicitly enable kerning for character range
+	auto range = Gdiplus::CharacterRange(0, (int)mWideText.length());
+	//mFormat.SetMeasurableCharacterRanges(1, &range);
+	auto & format = DeviceContextManager::instance()->getStringFormat();
+	format.SetMeasurableCharacterRanges(1, &range);
 
-protected:
-	void calcExtents() {
-		if (!mHasInvalidExtents) {
-			return;
-		}
-
-		// Important: explicitly enable kerning for character range
-		auto range = Gdiplus::CharacterRange(0, (int)mWideText.length());
-		mFormat.SetMeasurableCharacterRanges(1, &range);
-
-		Gdiplus::RectF sizeRect;
-		DeviceContextManager::instance()->getGraphics().MeasureString(mWideText.c_str(), -1, mFont.getGdiplusFont(), Gdiplus::PointF(0, 0), &mFormat, &sizeRect);
-		mSize.x = sizeRect.Width;
-		mSize.y = sizeRect.Height;
-		mHasInvalidExtents = false;
-	}
-
-protected:
-	Gdiplus::StringFormat	mFormat;
-	bool					mHasInvalidExtents;
-	ci::Font				mFont;
-	ci::ColorA				mColor;
-	StringType				mWideText;
-	ci::vec2				mSize;
-};
-
+	Gdiplus::RectF sizeRect;
+	DeviceContextManager::instance()->getGraphics().MeasureString(mWideText.c_str(), -1,
+																  mFont.getGdiplusFont(), Gdiplus::PointF(0, 0), &format, &sizeRect);
+	
+	mSize.x = sizeRect.Width;
+	mSize.y = sizeRect.Height;
+	mHasInvalidExtents = false;
+}
 
 //==================================================
 // Line Helper
 //
 
-typedef shared_ptr<class Line> LineRef;
+StyledTextLayout::Line::Line(TextAlign aTextAlign, float aLeadingOffset, bool aLeadingDisabled) :
+	mTextAlign(aTextAlign),
+	mLeadingOffset(aLeadingOffset),
+	mLeadingDisabled(aLeadingDisabled),
+	mSize(0, 0), mAscent(0), mDescent(0), mLeading(0),
+	mHasInvalidExtents(false) {
+}
+StyledTextLayout::Line::~Line() {}
 
-class Line {
-public:
-	Line(TextAlign aTextAlign, float aLeadingOffset, bool aLeadingDisabled) :
-		mTextAlign(aTextAlign),
-		mLeadingOffset(aLeadingOffset),
-		mLeadingDisabled(aLeadingDisabled),
-		mSize(0, 0), mAscent(0), mDescent(0), mLeading(0),
-		mHasInvalidExtents(false)
-	{}
-	~Line() {}
+void StyledTextLayout::Line::addRun(const StyledTextLayout::RunRef run) {
+	mRuns.push_back(run);
+	mHasInvalidExtents = true;
+}
 
-	const ci::vec2&			getSize() { calcExtents(); return mSize; }
-	const vector<RunRef> &	getRuns() const { return mRuns; }
-	const TextAlign			getTextAlign() const { return mTextAlign; }
-	float					getLeadingOffset() const { return mLeadingOffset; };
-	bool					getLeadingDisabled() const { return mLeadingDisabled; }
-	float					getDescent() { calcExtents(); return mDescent; };
-	float					getLeading() { calcExtents(); return mLeading; };
-	float					getAscent() { calcExtents(); return mAscent; };
-
-	void addRun(const RunRef run) {
-		mRuns.push_back(run);
-		mHasInvalidExtents = true;
+void StyledTextLayout::Line::calcExtents() {
+	if (!mHasInvalidExtents) {
+		return;
 	}
 
-	void calcExtents() {
-		if (!mHasInvalidExtents) {
-			return;
+	mSize.x = mSize.y = mAscent = mDescent = mLeading = 0.0f;
+
+	for (auto run : mRuns) {
+		mSize.x += run->getSize().x;
+		mAscent = std::max(run->getFont().getAscent(), mAscent);
+		mDescent = std::max(run->getFont().getDescent(), mDescent);
+
+		if (mLeadingDisabled) {
+			//mLeading = 1.0f; // seems necessary to correctly measure layout when using a typographic format
+			mLeading = 0.0f;
+		} else {
+			mLeading = std::max(run->getFont().getLeading(), mLeading);
 		}
 
-		mSize.x = mSize.y = mAscent = mDescent = mLeading = 0.0f;
-
-		for (auto run : mRuns) {
-			mSize.x += run->getSize().x;
-			mAscent = std::max(run->getFont().getAscent(), mAscent);
-			mDescent = std::max(run->getFont().getDescent(), mDescent);
-
-			if (mLeadingDisabled) {
-				//mLeading = 1.0f; // seems necessary to correctly measure layout when using a typographic format
-				mLeading = 0.0f;
-			}
-			else {
-				mLeading = std::max(run->getFont().getLeading(), mLeading);
-			}
-
-			mSize.y = std::max(mSize.y, run->getSize().y);
-		}
-
-		mSize.y = std::max(mSize.y, mAscent + mDescent + mLeading);
-		mHasInvalidExtents = false;
+		mSize.y = std::max(mSize.y, run->getSize().y);
 	}
 
-	void render(Gdiplus::Graphics *graphics, float currentY, float paddingLeft, float paddingRight, float maxWidth) {
-		float currentX = paddingLeft;
-		if (mTextAlign == TextAlign::Center) {
-			currentX = (maxWidth - mSize.x) * 0.5f;
-		}
-		else if (mTextAlign == TextAlign::Right) {
-			currentX = maxWidth - mSize.x - paddingRight;
-		}
-
-		for (auto run : mRuns) {
-			const Gdiplus::Font *font = run->getFont().getGdiplusFont();
-			ci::ColorA8u nativeColor(run->getColor());
-			Gdiplus::SolidBrush brush(Gdiplus::Color(nativeColor.a, nativeColor.r, nativeColor.g, nativeColor.b));
-			graphics->DrawString(run->getText().c_str(), -1, font, Gdiplus::PointF(currentX, currentY + (mAscent - run->getFont().getAscent())), &run->getFormat(), &brush);
-			currentX += run->getSize().x;
-		}
-	}
-
-protected:
-	vector<RunRef>		mRuns;
-	TextAlign			mTextAlign;
-	ci::vec2			mSize;
-	float				mLeadingOffset;
-	bool				mLeadingDisabled;
-	float				mDescent, mLeading, mAscent;
-	bool				mHasInvalidExtents;
-};
-
+	mSize.y = std::max(mSize.y, mAscent + mDescent + mLeading);
+	mHasInvalidExtents = false;
+}
 
 //==================================================
 // StyledTextLayout
@@ -272,13 +212,12 @@ StyledTextLayout::StyledTextLayout() :
 	mHasInvalidSize(false),
 	mHasInvalidLayout(false),
 	mSizeTrimmingEnabled(false),
-	mTextSize(0, 0)
-{
+	mTextSize(0, 0) {
 	// forces any globals we need to be initialized, particularly GDI+ on Windows
 	DeviceContextManager::instance();
 
-	mCurrentStyle = StyleManager::getInstance()->getDefaultStyle();
-	mParseOptions = StyledTextParser::getInstance()->getDefaultOptions();
+	mCurrentStyle = StyleManager::get()->getDefaultStyle();
+	mParseOptions = StyledTextParser::get()->getDefaultOptions();
 }
 
 StyledTextLayout::~StyledTextLayout() {
@@ -301,21 +240,21 @@ void StyledTextLayout::clearText() {
 }
 
 
-void StyledTextLayout::setText(const wstring & text) { clearText(); appendText(text); }
-void StyledTextLayout::setText(const wstring & text, const string styleName) { clearText(); appendText(text, styleName, true); }
-void StyledTextLayout::setText(const wstring & text, const Style& style) { clearText(); appendText(text, style, true); }
+void StyledTextLayout::setText(const wstring & text, const TokenParserMapRef customTokenParsers) { clearText(); appendText(text, customTokenParsers); }
+void StyledTextLayout::setText(const wstring & text, const string styleName, const TokenParserMapRef customTokenParsers) { clearText(); appendText(text, styleName, true, customTokenParsers); }
+void StyledTextLayout::setText(const wstring & text, const Style& style, const TokenParserMapRef customTokenParsers) { clearText(); appendText(text, style, true, customTokenParsers); }
 
-void StyledTextLayout::appendText(const wstring & text) {
-	appendSegments(StyledTextParser::getInstance()->parse(text, mCurrentStyle, mParseOptions));
+void StyledTextLayout::appendText(const wstring & text, const TokenParserMapRef customTokenParsers) {
+	appendSegments(StyledTextParser::get()->parse(text, mCurrentStyle, mParseOptions, customTokenParsers));
 }
-void StyledTextLayout::appendText(const wstring & text, const string & styleName, bool saveAsCurrentStyle) {
-	Style style = StyleManager::getInstance()->getStyle(styleName);
+void StyledTextLayout::appendText(const wstring & text, const string & styleName, bool saveAsCurrentStyle, const TokenParserMapRef customTokenParsers) {
+	Style style = StyleManager::get()->getStyle(styleName);
 	if (saveAsCurrentStyle) setCurrentStyle(style);
-	appendSegments(StyledTextParser::getInstance()->parse(text, style, mParseOptions));
+	appendSegments(StyledTextParser::get()->parse(text, style, mParseOptions, customTokenParsers));
 }
-void StyledTextLayout::appendText(const wstring & text, const Style& style, bool saveAsCurrentStyle) {
+void StyledTextLayout::appendText(const wstring & text, const Style& style, bool saveAsCurrentStyle, const TokenParserMapRef customTokenParsers) {
 	if (saveAsCurrentStyle) setCurrentStyle(style);
-	appendSegments(StyledTextParser::getInstance()->parse(text, style, mParseOptions));
+	appendSegments(StyledTextParser::get()->parse(text, style, mParseOptions, customTokenParsers));
 }
 
 void StyledTextLayout::setPlainText(const wstring & text) { clearText(); appendPlainText(text); }
@@ -326,7 +265,7 @@ void StyledTextLayout::appendPlainText(const wstring & text) {
 	appendSegment(StyledText(mCurrentStyle, text));
 }
 void StyledTextLayout::appendPlainText(const wstring & text, const string & styleName, bool saveAsCurrentStyle) {
-	Style style = StyleManager::getInstance()->getStyle(styleName);
+	Style style = StyleManager::get()->getStyle(styleName);
 	if (saveAsCurrentStyle) setCurrentStyle(style);
 	appendSegment(StyledText(style, text));
 }
@@ -337,13 +276,13 @@ void StyledTextLayout::appendPlainText(const wstring & text, const Style& style,
 
 
 // std::string helpers to convert to widestring
-void StyledTextLayout::setText(const string & text) { setText(wideString(text)); }
-void StyledTextLayout::setText(const string & text, const string styleName) { setText(wideString(text), styleName); }
-void StyledTextLayout::setText(const string & text, const Style& style) { setText(wideString(text), style); }
+void StyledTextLayout::setText(const string & text, const TokenParserMapRef customTokenParsers) { setText(wideString(text), customTokenParsers); }
+void StyledTextLayout::setText(const string & text, const string styleName, const TokenParserMapRef customTokenParsers) { setText(wideString(text), styleName, customTokenParsers); }
+void StyledTextLayout::setText(const string & text, const Style& style, const TokenParserMapRef customTokenParsers) { setText(wideString(text), style, customTokenParsers); }
 
-void StyledTextLayout::appendText(const string & text) { appendText(wideString(text)); }
-void StyledTextLayout::appendText(const string & text, const string & styleName, bool saveAsCurrentStyle) { appendText(wideString(text), styleName, saveAsCurrentStyle); }
-void StyledTextLayout::appendText(const string & text, const Style& style, bool saveAsCurrentStyle) { appendText(wideString(text), style, saveAsCurrentStyle); }
+void StyledTextLayout::appendText(const string & text, const TokenParserMapRef customTokenParsers) { appendText(wideString(text), customTokenParsers); }
+void StyledTextLayout::appendText(const string & text, const string & styleName, bool saveAsCurrentStyle, const TokenParserMapRef customTokenParsers) { appendText(wideString(text), styleName, saveAsCurrentStyle, customTokenParsers); }
+void StyledTextLayout::appendText(const string & text, const Style& style, bool saveAsCurrentStyle, const TokenParserMapRef customTokenParsers) { appendText(wideString(text), style, saveAsCurrentStyle, customTokenParsers); }
 
 void StyledTextLayout::setPlainText(const string & text) { setPlainText(wideString(text)); }
 void StyledTextLayout::setPlainText(const string & text, const string styleName) { setPlainText(wideString(text), styleName); }
@@ -365,7 +304,7 @@ StyledTextLayout::ClipMode StyledTextLayout::getClipMode() const { return mClipM
 void StyledTextLayout::setClipMode(const ClipMode value) { mClipMode = value; invalidate(); }
 
 void StyledTextLayout::setCurrentStyle(Style style) { mCurrentStyle = style; }
-void StyledTextLayout::setCurrentStyle(const std::string & styleName) { mCurrentStyle = StyleManager::getInstance()->getStyle(styleName); }
+void StyledTextLayout::setCurrentStyle(const std::string & styleName) { mCurrentStyle = StyleManager::get()->getStyle(styleName); }
 Style StyledTextLayout::getCurrentStyle() const { return mCurrentStyle; }
 
 void StyledTextLayout::setFontFamily(const string & family, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mFontFamily = family; }); }
@@ -450,10 +389,11 @@ void StyledTextLayout::appendSegment(const StyledText & segment) {
 		line = addLine(segment.mStyle);
 	}
 
-	const ci::Font& font = FontManager::getInstance()->getFont(segment.mStyle);
+	const ci::Font& font = FontManager::get()->getFont(segment.mStyle);
 	const ci::ColorA& color = segment.mStyle.mColor;
 
-	RunRef run(new Run(font, color));
+
+	auto run = make_shared<Run>(segment.mStyle, font, color);
 
 	int lastNonWordIndex = -1;
 	int lastWordIndex = 0;
@@ -473,18 +413,17 @@ void StyledTextLayout::appendSegment(const StyledText & segment) {
 	}
 
 	//const auto untransformedText = segment.mWText.empty() ? text::wideString(segment.mText) : segment.mWText;
-	const auto untransformedText = segment.mWText;
-	const auto wideText = text::transform(untransformedText, segment.mStyle.mTextTransform);
-	const auto delimiters = text::wideString(" \n");
-	const auto tokens = tokenize(wideText, delimiters);
-
+	const StringType untransformedText = segment.mWText;
+	const StringType wideText = text::transform(untransformedText, segment.mStyle.mTextTransform);
+	const StringType delimiters = text::wideString(" \n\t");
+	const auto tokens = text::tokenize(wideText, delimiters);
 
 	for (const auto& token : tokens) {
 		if (token.empty()) continue;
 
 		const CharType c = token.at(0);
 		const bool isNewline = c == cNewline;
-		const bool isWhitespace = c == cWhitespace || c == cTab;
+		const bool isWhitespace = text::isSpace(c);
 
 		// strip line breaks
 		if (shouldStripBreaks && isNewline) {
@@ -514,7 +453,7 @@ void StyledTextLayout::appendSegment(const StyledText & segment) {
 
 			// start new line and run
 			line = addLine(segment.mStyle);
-			run = RunRef(new Run(font, color));
+			run = make_shared<Run>(segment.mStyle, font, color);
 
 			if (!isWhitespace && !isNewline) {
 				// move word to next line
@@ -529,9 +468,9 @@ void StyledTextLayout::appendSegment(const StyledText & segment) {
 	mHasInvalidLayout = false; // mark layout as valid
 }
 
-shared_ptr<Line> StyledTextLayout::addLine(const Style & style) {
+shared_ptr<StyledTextLayout::Line> StyledTextLayout::addLine(const Style & style) {
 	invalidate(false, true);
-	shared_ptr<Line> line(new Line(style.mTextAlign, style.mLeadingOffset, mLeadingDisabled));
+	auto line = make_shared<Line>(style.mTextAlign, style.mLeadingOffset, mLeadingDisabled);
 	mLines.push_back(line);
 	return line;
 }
@@ -550,7 +489,7 @@ ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied,
 	validateSize();
 
 	ci::Surface result;
-	ci::ivec2 bitmapSize = getTextSize();
+	ci::ivec2 bitmapSize = ci::vec2(getTextSize());
 
 	// Odd failure - return a NULL Surface
 	if (bitmapSize.x < 0 || bitmapSize.y < 0) {
@@ -560,7 +499,7 @@ ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied,
 	// I don't have a great explanation for this other than it seems to be necessary
 	bitmapSize.y += 1;
 
-	// prep our GDI and GDI+ resources
+	// Prep our GDI and GDI+ resources
 	result = ci::Surface8u(bitmapSize.x, bitmapSize.y, useAlpha, ci::SurfaceConstraintsGdiPlus());
 	result.setPremultiplied(premultiplied);
 
@@ -569,11 +508,36 @@ ci::Surface	StyledTextLayout::renderToSurface(bool useAlpha, bool premultiplied,
 	offscreenGraphics->SetTextRenderingHint(Gdiplus::TextRenderingHint::TextRenderingHintAntiAlias);
 	offscreenGraphics->Clear(Gdiplus::Color(clearColor.a, clearColor.r, clearColor.g, clearColor.b));
 
-	// walk the lines and getSurface them, advancing our Y offset along the way
+	// Walk the lines and getSurface them, advancing our Y offset along the way
+	const float maxWidth = (float)bitmapSize.x;
+	const float paddingLeft = mPaddingLeft;
+	const float paddingRight =  mPaddingRight;
 	float currentY = mPaddingTop;
-	for (auto& line : mLines) {
+
+	for (const auto & line : mLines) {
 		currentY += line->getLeadingOffset() + line->getLeading();
-		line->render(offscreenGraphics, currentY, mPaddingLeft, mPaddingRight, (float)bitmapSize.x);
+
+		float currentX = paddingLeft;
+
+		if (line->getTextAlign() == TextAlign::Center) {
+			currentX = (maxWidth - line->getSize().x) * 0.5f;
+
+		} else if (line->getTextAlign() == TextAlign::Right) {
+			currentX = maxWidth - line->getSize().x - mPaddingRight;
+		}
+
+		for (const auto & run : line->getRuns()) {
+			const ci::ColorA8u & color = run->getColor();
+			const Gdiplus::Font * font = run->getFont().getGdiplusFont();
+			const Gdiplus::SolidBrush brush(Gdiplus::Color(color.a, color.r, color.g, color.b));
+			const Gdiplus::PointF origin(currentX, currentY + (line->getAscent() - run->getFont().getAscent()));
+			const Gdiplus::CharacterRange range(0, (int)run->getText().length());
+			auto & format = DeviceContextManager::instance()->getStringFormat();
+			format.SetMeasurableCharacterRanges(1, &range);
+			offscreenGraphics->DrawString(run->getText().c_str(), -1, font, origin, &format, &brush);
+			currentX += run->getSize().x;
+		}
+
 		currentY += line->getAscent() + line->getDescent();
 	}
 

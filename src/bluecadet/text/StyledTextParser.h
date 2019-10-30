@@ -25,9 +25,8 @@ public:
 		TRIM_TRAILING_BREAKS = 0x1 << 5
 	};
 
-	static StyledTextParserRef getInstance() {
-		static StyledTextParserRef instance = nullptr;
-		if (!instance) instance = StyledTextParserRef(new StyledTextParser());
+	static StyledTextParserRef get() {
+		static auto instance = std::make_shared<StyledTextParser>();
 		return instance;
 	}
 
@@ -35,7 +34,7 @@ public:
 	~StyledTextParser();
 
 	std::vector<StyledText> parse(const text::StringType& str, Style baseStyle);
-	std::vector<StyledText> parse(const text::StringType& str, Style baseStyle, int options);
+	std::vector<StyledText> parse(const text::StringType& str, Style baseStyle, int options, const TokenParserMapRef customTokenParsers = nullptr);
 
 	int getDefaultOptions() const { return mDefaultOptions; }
 	void setDefaultOptions(const int value) { mDefaultOptions = value; }
@@ -44,6 +43,7 @@ protected:
 	std::vector<text::StringType> splitStringIntoTokens(text::StringType str);
 
 	int mDefaultOptions;
+	TokenParserMap mDefaultTokenParsers;
 };
 
 }

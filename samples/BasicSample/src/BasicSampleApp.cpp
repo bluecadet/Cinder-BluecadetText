@@ -51,13 +51,12 @@ void BasicSampleApp::setup() {
 	mTextLayout->setFontFamily("OpenSans"); // Use a font from your fonts.json
 	mTextLayout->setFontSize(48.f);
 	mTextLayout->setTextColor(Color::white());
-	mTextLayout->setTextAlign(TextAlign::Center);
+	mTextLayout->setTextAlign(TextAlign::Left);
 	mTextLayout->setTextTransform(TextTransform::Capitalize);
-	mTextLayout->setText("Jaded zombies acted quaintly but kept driving their oxen forward.");
+	//mTextLayout->setText("Jaded zombies acted quaintly but kept driving their oxen forward.");
 
 	// And you should be able to render
-	mTextLayout->setText("Jaded <b><i>zombies</i> acted<br/>quaintly</b> but \
-kept driving <i>their oxen forward</i>.");
+	mTextLayout->setText("Jaded <b><i>zombies</i> acted<br/>quaintly</b> but kept driving-their oxen forward</i>.");
 }
 
 void BasicSampleApp::update() {

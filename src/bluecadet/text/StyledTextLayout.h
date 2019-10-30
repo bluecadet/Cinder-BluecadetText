@@ -28,6 +28,7 @@
 
 #include "cinder/Cinder.h"
 #include "cinder/Surface.h"
+#include "cinder/Font.h"
 
 #include <vector>
 #include <string>
@@ -41,6 +42,59 @@ typedef std::shared_ptr<class StyledTextLayout> StyledTextLayoutRef;
 
 class StyledTextLayout {
 public:
+
+	class Run {
+	public:
+		Run(const Style style, const ci::Font & aFont, const ci::ColorA & aColor);
+		~Run();
+
+		inline const Style &					getStyle() const { return mStyle; }
+		inline const ci::vec2 &					getSize() { calcExtents(); return mSize; };
+		inline const StringType &				getText() const { return mWideText; }
+		inline const ci::ColorA &				getColor() const { return mColor; }
+		inline const ci::Font &					getFont() const { return mFont; }
+
+		void append(const StringType & text);
+		void setText(const StringType & text);
+		void calcExtents();
+
+	protected:
+		bool mHasInvalidExtents;
+		Style mStyle;
+		ci::Font mFont;
+		ci::ColorA mColor;
+		StringType mWideText;
+		ci::vec2 mSize;
+	};
+	typedef std::shared_ptr<Run> RunRef;
+
+	class Line {
+	public:
+		Line(TextAlign aTextAlign, float aLeadingOffset, bool aLeadingDisabled);
+		~Line();
+
+		inline const ci::vec2 &				getSize() { calcExtents(); return mSize; }
+		inline const std::vector<RunRef> &	getRuns() const { return mRuns; }
+		inline const TextAlign				getTextAlign() const { return mTextAlign; }
+		inline float						getLeadingOffset() const { return mLeadingOffset; };
+		inline bool							getLeadingDisabled() const { return mLeadingDisabled; }
+		inline float						getDescent() { calcExtents(); return mDescent; };
+		inline float						getLeading() { calcExtents(); return mLeading; };
+		inline float						getAscent() { calcExtents(); return mAscent; };
+
+		void addRun(const RunRef run);
+		void calcExtents();
+
+	protected:
+		std::vector<RunRef>		mRuns;
+		TextAlign				mTextAlign;
+		ci::vec2				mSize;
+		float					mLeadingOffset;
+		bool					mLeadingDisabled;
+		float					mDescent, mLeading, mAscent;
+		bool					mHasInvalidExtents;
+	};
+	typedef std::shared_ptr<Line> LineRef;
 
 	enum LayoutMode {
 		WordWrap,	//! Default: Wraps automatically at max width. Will keep words that are longer than max wdith on a single line, but not break them.
@@ -75,18 +129,18 @@ public:
 
 
 	//! Replaces the current text and keeps the current style. Parses supported style tags.
-	void setText(const std::string & text);
+	void setText(const std::string & text, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Replaces the current text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void setText(const std::string & text, const std::string styleName);
+	void setText(const std::string & text, const std::string styleName, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Replaces the current text and and sets the current style. Parses supported style tags.
-	void setText(const std::string & text, const Style& style);
+	void setText(const std::string & text, const Style& style, const TokenParserMapRef customTokenParsers = nullptr);
 
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Parses supported style tags.
-	void appendText(const std::string & text);
+	void appendText(const std::string & text, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void appendText(const std::string & text, const std::string & styleName, bool saveAsCurrentStyle = false);
+	void appendText(const std::string & text, const std::string & styleName, bool saveAsCurrentStyle = false, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Appends text to any existing text and and sets the current style. Parses supported style tags.
-	void appendText(const std::string & text, const Style& style, bool saveAsCurrentStyle = false);
+	void appendText(const std::string & text, const Style& style, bool saveAsCurrentStyle = false, const TokenParserMapRef customTokenParsers = nullptr);
 
 	//! Replaces the current text with plain text and keeps the current style. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
 	void setPlainText(const std::string & text);
@@ -104,18 +158,18 @@ public:
 
 
 	//! Replaces the current text and keeps the current style. Parses supported style tags.
-	void setText(const std::wstring & text);
+	void setText(const std::wstring & text, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Replaces the current text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void setText(const std::wstring & text, const std::string styleName);
+	void setText(const std::wstring & text, const std::string styleName, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Replaces the current text and and sets the current style. Parses supported style tags.
-	void setText(const std::wstring & text, const Style& style);
+	void setText(const std::wstring & text, const Style& style, const TokenParserMapRef customTokenParsers = nullptr);
 
 	//! Appends text to any existing text. More efficient than resetting all text if you just want to add to existing text. Parses supported style tags.
-	void appendText(const std::wstring & text);
+	void appendText(const std::wstring & text, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Appends text to any existing text and and sets the current style by loading it from the StyleManager. Parses supported style tags.
-	void appendText(const std::wstring & text, const std::string & styleName, bool saveAsCurrentStyle = false);
+	void appendText(const std::wstring & text, const std::string & styleName, bool saveAsCurrentStyle = false, const TokenParserMapRef customTokenParsers = nullptr);
 	//! Appends text to any existing text and and sets the current style. Parses supported style tags.
-	void appendText(const std::wstring & text, const Style& style, bool saveAsCurrentStyle = false);
+	void appendText(const std::wstring & text, const Style& style, bool saveAsCurrentStyle = false, const TokenParserMapRef customTokenParsers = nullptr);
 
 	//! Replaces the current text with plain text. Text will not be parsed for style tags, making this method slightly more efficient than its text counterpart.
 	void setPlainText(const std::wstring & text);
@@ -235,6 +289,16 @@ public:
 	//! Returns all of the current segments of text
 	inline const std::vector<StyledText> & getSegments() const;
 
+	//! Returns all lines
+	inline const std::vector<LineRef> & getLines() { validateSize(); return mLines; }
+
+	//! The options used when parsing text. Defaults to the default text parser options at creation of this StyledTextLayout.
+	inline void setParseOptions(int options) { mParseOptions = options; }
+	inline int getParseOptions() const { return mParseOptions; }
+
+	//! The hinting style used by GDI to render text
+	//inline void setRenderingHint(Gdiplus::TextRenderingHint value) { mRenderingHint = value; }
+	//inline Gdiplus::TextRenderingHint getRenderingHint() const { return mRenderingHint; }
 
 protected:
 	//! Marks the current size and layout as invalid. Call this method when making any style or content changes to queue a validation when necessary.
@@ -276,7 +340,12 @@ protected:
 	float		mPaddingBottom;
 	float		mPaddingLeft;
 	Style		mCurrentStyle;
+
+	// Rendering properties
+	//Gdiplus::TextRenderingHint mRenderingHint;;
+
 };
+
 
 }
 }
