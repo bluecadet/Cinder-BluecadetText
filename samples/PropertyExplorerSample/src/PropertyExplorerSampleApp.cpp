@@ -35,7 +35,7 @@ protected:
 	ci::params::InterfaceGlRef mParams;
 	vector<string> mParamClipModes;
 	vector<string> mParamLayoutModes;
-	bool mForceUpdates = false;
+	bool mForceUpdates = true;
 	bool mOscillate = false;
 	bool mDrawTextBoxOnTop = false;
 };
@@ -52,8 +52,8 @@ void PropertyExplorerSampleApp::setup()
 	appropriate fonts for a certain family, weight and style and the
 	FontManager will determine which font is returned based on the json.
 	*/
-	FontManager::getInstance()->setLogLevel(FontManager::LogLevel::Warning);
-	FontManager::getInstance()->setup(getAssetPath("fonts.json"));
+	FontManager::get()->setLogLevel(FontManager::LogLevel::Warning);
+	FontManager::get()->setup(getAssetPath("fonts.json"));
 
 	/*
 	The style manager loads a single json that defines the default
@@ -63,7 +63,7 @@ void PropertyExplorerSampleApp::setup()
 	the app. All StyledTextLayout instances use the shared style
 	manager to load styles.
 	*/
-	StyleManager::getInstance()->setup(getAssetPath("styles.json"), "styles");
+	StyleManager::get()->setup(getAssetPath("styles.json"), "styles");
 
 	/*
 	A shared text parser is used to parse simple html tags from text
@@ -71,7 +71,7 @@ void PropertyExplorerSampleApp::setup()
 	instance to invert nested italics, which means that italics within
 	italics will become regular (e.g. <i>italic <i>regular</i> italic</i>).
 	*/
-	StyledTextParser::getInstance()->setDefaultOptions(StyledTextParser::OptionFlags::INVERT_NESTED_ITALICS);
+	StyledTextParser::get()->setDefaultOptions(StyledTextParser::OptionFlags::INVERT_NESTED_ITALICS);
 
 	// Loads a file with some placeholder text
 	loadText();
