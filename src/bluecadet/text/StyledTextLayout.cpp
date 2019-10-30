@@ -216,8 +216,8 @@ StyledTextLayout::StyledTextLayout() :
 	// forces any globals we need to be initialized, particularly GDI+ on Windows
 	DeviceContextManager::instance();
 
-	mCurrentStyle = StyleManager::getInstance()->getDefaultStyle();
-	mParseOptions = StyledTextParser::getInstance()->getDefaultOptions();
+	mCurrentStyle = StyleManager::get()->getDefaultStyle();
+	mParseOptions = StyledTextParser::get()->getDefaultOptions();
 }
 
 StyledTextLayout::~StyledTextLayout() {
@@ -245,16 +245,16 @@ void StyledTextLayout::setText(const wstring & text, const string styleName, con
 void StyledTextLayout::setText(const wstring & text, const Style& style, const TokenParserMapRef customTokenParsers) { clearText(); appendText(text, style, true, customTokenParsers); }
 
 void StyledTextLayout::appendText(const wstring & text, const TokenParserMapRef customTokenParsers) {
-	appendSegments(StyledTextParser::getInstance()->parse(text, mCurrentStyle, mParseOptions, customTokenParsers));
+	appendSegments(StyledTextParser::get()->parse(text, mCurrentStyle, mParseOptions, customTokenParsers));
 }
 void StyledTextLayout::appendText(const wstring & text, const string & styleName, bool saveAsCurrentStyle, const TokenParserMapRef customTokenParsers) {
-	Style style = StyleManager::getInstance()->getStyle(styleName);
+	Style style = StyleManager::get()->getStyle(styleName);
 	if (saveAsCurrentStyle) setCurrentStyle(style);
-	appendSegments(StyledTextParser::getInstance()->parse(text, style, mParseOptions, customTokenParsers));
+	appendSegments(StyledTextParser::get()->parse(text, style, mParseOptions, customTokenParsers));
 }
 void StyledTextLayout::appendText(const wstring & text, const Style& style, bool saveAsCurrentStyle, const TokenParserMapRef customTokenParsers) {
 	if (saveAsCurrentStyle) setCurrentStyle(style);
-	appendSegments(StyledTextParser::getInstance()->parse(text, style, mParseOptions, customTokenParsers));
+	appendSegments(StyledTextParser::get()->parse(text, style, mParseOptions, customTokenParsers));
 }
 
 void StyledTextLayout::setPlainText(const wstring & text) { clearText(); appendPlainText(text); }
@@ -265,7 +265,7 @@ void StyledTextLayout::appendPlainText(const wstring & text) {
 	appendSegment(StyledText(mCurrentStyle, text));
 }
 void StyledTextLayout::appendPlainText(const wstring & text, const string & styleName, bool saveAsCurrentStyle) {
-	Style style = StyleManager::getInstance()->getStyle(styleName);
+	Style style = StyleManager::get()->getStyle(styleName);
 	if (saveAsCurrentStyle) setCurrentStyle(style);
 	appendSegment(StyledText(style, text));
 }
@@ -304,7 +304,7 @@ StyledTextLayout::ClipMode StyledTextLayout::getClipMode() const { return mClipM
 void StyledTextLayout::setClipMode(const ClipMode value) { mClipMode = value; invalidate(); }
 
 void StyledTextLayout::setCurrentStyle(Style style) { mCurrentStyle = style; }
-void StyledTextLayout::setCurrentStyle(const std::string & styleName) { mCurrentStyle = StyleManager::getInstance()->getStyle(styleName); }
+void StyledTextLayout::setCurrentStyle(const std::string & styleName) { mCurrentStyle = StyleManager::get()->getStyle(styleName); }
 Style StyledTextLayout::getCurrentStyle() const { return mCurrentStyle; }
 
 void StyledTextLayout::setFontFamily(const string & family, bool updateExistingText) { modifyStyles(updateExistingText, [&](Style& s) { s.mFontFamily = family; }); }
@@ -389,7 +389,7 @@ void StyledTextLayout::appendSegment(const StyledText & segment) {
 		line = addLine(segment.mStyle);
 	}
 
-	const ci::Font& font = FontManager::getInstance()->getFont(segment.mStyle);
+	const ci::Font& font = FontManager::get()->getFont(segment.mStyle);
 	const ci::ColorA& color = segment.mStyle.mColor;
 
 

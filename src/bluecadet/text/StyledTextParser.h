@@ -25,9 +25,8 @@ public:
 		TRIM_TRAILING_BREAKS = 0x1 << 5
 	};
 
-	static StyledTextParserRef getInstance() {
-		static StyledTextParserRef instance = nullptr;
-		if (!instance) instance = StyledTextParserRef(new StyledTextParser());
+	static StyledTextParserRef get() {
+		static auto instance = std::make_shared<StyledTextParser>();
 		return instance;
 	}
 
