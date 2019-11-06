@@ -167,7 +167,7 @@ void PropertyExplorerSampleApp::draw()
 
 		// draw max width and height outline
 		gl::color(ColorA(0.0f, 0.0f, 1.0f, 0.75f));
-		gl::drawStrokedRect(Rectf(vec2(0.0f), mTextLayout->getTextSize()));
+		gl::drawStrokedRect(bounds);
 	}
 
 	// draw debug info
@@ -190,6 +190,6 @@ CINDER_APP(PropertyExplorerSampleApp,
 	RendererGl(RendererGl::Options().msaa(4)),
 	[&](ci::app::App::Settings *settings)
 {
-	settings->setHighDensityDisplayEnabled(true);
+	settings->setHighDensityDisplayEnabled(false);
 	settings->setWindowSize(900, 640);
 })

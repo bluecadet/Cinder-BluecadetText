@@ -1,6 +1,7 @@
 #pragma once
 
 #include "cinder/Color.h"
+#include "cinder/Log.h"
 
 #include <codecvt>
 #include <cstdint>
@@ -117,8 +118,7 @@ inline TextAlign getTextAlignFromString(std::string TextAlignStr) {
 	if (TextAlignStr == "left") return Left;
 	if (TextAlignStr == "center") return Center;
 	if (TextAlignStr == "right") return Right;
-	std::cout << "text: Warning: TextAlign '" << TextAlignStr << "' is not supported. Defaulting to 'left'"
-			  << std::endl;
+	CI_LOG_W("TextAlign '" << TextAlignStr << "' is not supported. Defaulting to 'left'");
 	return Left;
 }
 
@@ -137,8 +137,7 @@ inline TextTransform getTextTransformFromString(std::string textTransformStr) {
 	if (textTransformStr == "uppercase") return Uppercase;
 	if (textTransformStr == "lowercase") return Lowercase;
 	if (textTransformStr == "capitalize") return Capitalize;
-	std::cout << "text: Warning: TextTransform '" << textTransformStr << "' is not supported. Defaulting to 'none'"
-			  << std::endl;
+	CI_LOG_W("TextTransform '" << textTransformStr << "' is not supported. Defaulting to 'none'");
 	return None;
 }
 
@@ -155,8 +154,7 @@ inline FontStyle getFontStyleFromString(std::string styleString) {
 	if (styleString == "normal") return Normal;
 	if (styleString == "italic") return Italic;
 	if (styleString == "oblique") return Oblique;
-	std::cout << "text: Warning: Font style '" << styleString << "' is not supported. Defaulting to 'normal'"
-			  << std::endl;
+	CI_LOG_W("Font style '" << styleString << "' is not supported. Defaulting to 'normal'");
 	return Normal;
 }
 

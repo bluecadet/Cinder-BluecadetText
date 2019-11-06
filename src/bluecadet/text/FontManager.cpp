@@ -32,14 +32,14 @@ void FontManager::setup(ci::fs::path jsonPath) {
 
 	DataSourceRef jsonData = loadFile(jsonPath);
 
-	if (!jsonData) {
-		if (mLogLevel >= LogLevel::Error) {
-			CI_LOG_E("FontManager: Error: Can't load json at '" << jsonPath << "'");
-		}
-		return;
-	}
-
 	try {
+		if (!jsonData) {
+			if (mLogLevel >= LogLevel::Error) {
+				CI_LOG_E("FontManager: Error: Can't load json at '" << jsonPath << "'");
+			}
+			return;
+		}
+
 		JsonTree json = JsonTree(jsonData);
 		std::string jsonDirPath = jsonPath.remove_filename().string();
 
@@ -53,10 +53,14 @@ void FontManager::setup(ci::fs::path jsonPath) {
 				int weight = stoi(weightJson.getKey());
 
 				for (auto & styleJson : weightJson.getChildren()) {
-					FontStyle style = getFontStyleFromString(styleJson.getKey());
-					string fileName = styleJson.getValue();
-					fs::path filePath = fs::path(jsonDirPath + "/" + fileName);
-					filePaths[style] = filePath.string();
+					try {
+						FontStyle style = getFontStyleFromString(styleJson.getKey());
+						string fileName = styleJson.getValue();
+						fs::path filePath = fs::path(jsonDirPath + "/" + fileName);
+						filePaths[style] = filePath.string();
+					} catch (const ci::Exception & e) {
+						CI_LOG_EXCEPTION("FontManager: Error: Could not create font style: ", e);
+					}
 				}
 
 				styles[weight] = filePaths;
