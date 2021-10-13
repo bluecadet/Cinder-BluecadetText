@@ -10,8 +10,19 @@
 #include <string>
 #include <sstream> 
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
+/* Added in cinder 0.9.3 upgrades */
+#include <clocale>
+#include <cwctype>
+
+#include <iostream>
+#include <string>
+#include <algorithm>
+/* Commented out in cinder 0.9.3 upgrades */
+//#include <boost/algorithm/string.hpp>
+//#include <boost/tokenizer.hpp>
+
+/* EOF file/header comments additions */
+
 
 namespace bluecadet {
 namespace text {
@@ -221,6 +232,21 @@ inline std::string colorToHexStr(const ci::ColorA & color, const std::string & p
 //==================================================
 // Text helpers
 //
+//! Trim leading and trailing white space
+template <typename StringType>
+inline StringType trim(StringType& str) {
+	// Trim left
+	std::string WHITESPACE = " \n\r\t\f\v";
+	StringType test;
+	size_t start = test.find_first_not_of(WHITESPACE);
+	str = (start == std::string::npos) ? str : str.substr(start);
+
+	// Trim right
+	size_t end = test.find_last_not_of(WHITESPACE);
+	str = (end == std::string::npos) ? str : str.substr(0, end + 1);
+	// KZ -- Look at trim StringType
+	return str;
+}
 
 //! Splits a string into tokens based on delimiters. All delimiters are returned as tokens themselves.
 template <typename StringType, typename ContainerType>
@@ -238,13 +264,24 @@ inline void tokenize(const StringType & str, ContainerType & tokenContainer, con
 template <typename StringType>
 inline std::list<StringType> tokenize(const StringType & str, const StringType & delimiters) {
 	std::list<StringType> tokenContainer;
-	typedef typename StringType::value_type CharType;
-	typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
-	boost::char_separator<wchar_t> sep{StringType().c_str(), delimiters.c_str()};
-	tokenizer tok{str, sep};
-	for (const auto & t : tok) {
-		tokenContainer.push_back(t);
-	}
+	//typedef typename StringType::value_type CharType;
+	//typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
+	//boost::char_separator<wchar_t> sep{StringType().c_str(), delimiters.c_str()};
+	//tokenizer tok{str, sep};
+
+	// stringstream class check1
+	//stringstream strStream(str);
+
+	//// Temp string to hold token
+	//string tok;
+
+	//while (getline(strStream, tok, delimiters)) {
+	//	// Push token into container
+	//	tokenContainer.push_back(tok);
+	//}
+	// 
+	// KZ -- Look at tokenizing with  StringType
+
 	return tokenContainer;
 }
 
@@ -287,8 +324,12 @@ template <typename StringType> inline StringType transform(const StringType & te
 			/*case TextTransform::Uppercase: run->append(boost::locale::to_upper(token)); break;
 			case TextTransform::Lowercase: run->append(boost::locale::to_lower(token)); break;
 			case TextTransform::Capitalize: run->append(boost::locale::to_title(token)); break;*/
-		case TextTransform::Uppercase: return boost::algorithm::to_upper_copy(text);
-		case TextTransform::Lowercase: return boost::algorithm::to_lower_copy(text);
+		case TextTransform::Uppercase: 
+			std::transform(text.begin(), text.end(), text.begin(), ::toupper);
+			return text;
+		case TextTransform::Lowercase: 
+			std::transform(text.begin(), text.end(), text.begin(), ::tolower);
+			return text;
 		case TextTransform::Capitalize: return capitalize(text);
 		default: return text;
 	}

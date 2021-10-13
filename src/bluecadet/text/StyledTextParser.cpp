@@ -140,14 +140,17 @@ std::vector<StyledText> StyledTextParser::parse(const StringType& str, Style bas
 		std::stack<Style> styles;
 		styles.push(baseStyle);
 
-		const StringType& text = options & TRIM_WHITESPACE ? boost::trim_copy(str) : str;
+		// Does TRIM_WHITESPACE trim leading, trailing, or all white space? - KZ 
+		// Added utility function to trim leading and trailing whitespace
+		const StringType& text = options & TRIM_WHITESPACE ? text::trim(str) : str;
 
 		vector<StringType> tokens = splitStringIntoTokens(L"<root>" + text + L"</root>");
 
 		for (auto& token : tokens) {
 			// Lowercase tag for consistent tag checks
-			const auto tag = boost::to_lower_copy(token);
-
+			std::transform(token.begin(), token.end(), token.begin(), ::tolower);
+			auto tag = token;
+			
 			// If has macthing custom parser, use it to parse token
 			if (customTokenParsers != nullptr) {
 				const auto iter = customTokenParsers->find(tag);
