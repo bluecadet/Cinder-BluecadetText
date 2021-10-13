@@ -142,6 +142,7 @@ std::vector<StyledText> StyledTextParser::parse(const StringType& str, Style bas
 
 		// Does TRIM_WHITESPACE trim leading, trailing, or all white space? - KZ 
 		// Added utility function to trim leading and trailing whitespace
+		// TODO: Test trim
 		const StringType& text = options & TRIM_WHITESPACE ? text::trim(str) : str;
 
 		vector<StringType> tokens = splitStringIntoTokens(L"<root>" + text + L"</root>");

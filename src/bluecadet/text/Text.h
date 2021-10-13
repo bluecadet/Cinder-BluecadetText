@@ -234,34 +234,48 @@ inline std::string colorToHexStr(const ci::ColorA & color, const std::string & p
 //
 //! Trim leading and trailing white space
 template <typename StringType>
-inline StringType trim(const StringType& str) {
+inline StringType trim(StringType& str) {
 	// Trim left
 	//const std::string WHITESPACE = " \n\r\t\f\v";
 
-	//size_t start = str.c_str().find_first_not_of(WHITESPACE);
+	//size_t start = str.find_first_not_of(WHITESPACE);
 	//(start == std::string::npos) ? str : str.substr(start);
 
 	//// Trim right
 	//size_t end = str.find_last_not_of(WHITESPACE);
 	//(end == std::string::npos) ? str : str.substr(0, end + 1);
+	// TODO: Test trim
+	auto start = str.begin();
+	while (start != str.end() && std::isspace(*start)) {
+		start++;
+	}
 
+	auto end = str.end();
+	do {
+		end--;
+	} while (std::distance(start, end) > 0 && std::isspace(*end));
+
+	return StringType(start, end + 1);
 
 
 	// KZ -- Look at trim StringType
 	return str;
 }
 
+
+// KZ - Question, this seems to have a boost reference in it but I assume since it doesn't have any calls to it it is not causing 
+// any compile issues?
 //! Splits a string into tokens based on delimiters. All delimiters are returned as tokens themselves.
-//template <typename StringType, typename ContainerType>
-//inline void tokenize(const StringType & str, ContainerType & tokenContainer, const StringType & delimiters) {
-//	typedef typename StringType::value_type CharType;
-//	typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
-//	boost::char_separator<wchar_t> sep{StringType().c_str(), delimiters.c_str()};
-//	tokenizer tok{str, sep};
-//	for (const auto & t : tok) {
-//		tokenContainer.push_back(t);
-//	}
-//}
+template <typename StringType, typename ContainerType>
+inline void tokenize(const StringType & str, ContainerType & tokenContainer, const StringType & delimiters) {
+	typedef typename StringType::value_type CharType;
+	typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
+	boost::char_separator<wchar_t> sep{StringType().c_str(), delimiters.c_str()};
+	tokenizer tok{str, sep};
+	for (const auto & t : tok) {
+		tokenContainer.push_back(t);
+	}
+}
 
 //! Splits a string into tokens based on delimiters. All delimiters are returned as tokens themselves.
 template <typename StringType>
@@ -289,9 +303,6 @@ inline std::list<StringType> tokenize(const StringType & str, const StringType &
 	return tokenContainer;
 }
 
-template <typename StringType>
-inline const auto foo(const StringType& s, char delimiter) {
-}
 
 //! Joins a list of strings with a join character.
 template <typename StringType, typename ContainerType>
