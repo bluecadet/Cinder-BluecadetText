@@ -149,7 +149,7 @@ std::vector<StyledText> StyledTextParser::parse(const StringType& str, Style bas
 		for (auto& token : tokens) {
 			// Lowercase tag for consistent tag checks
 			std::transform(token.begin(), token.end(), token.begin(), ::tolower);
-			auto tag = token;
+			const auto tag = token;
 			
 			// If has macthing custom parser, use it to parse token
 			if (customTokenParsers != nullptr) {

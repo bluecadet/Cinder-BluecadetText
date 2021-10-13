@@ -15,8 +15,8 @@
 #include <cwctype>
 
 #include <iostream>
-#include <string>
 #include <algorithm>
+
 /* Commented out in cinder 0.9.3 upgrades */
 //#include <boost/algorithm/string.hpp>
 //#include <boost/tokenizer.hpp>
@@ -234,31 +234,34 @@ inline std::string colorToHexStr(const ci::ColorA & color, const std::string & p
 //
 //! Trim leading and trailing white space
 template <typename StringType>
-inline StringType trim(StringType& str) {
+inline StringType trim(const StringType& str) {
 	// Trim left
-	std::string WHITESPACE = " \n\r\t\f\v";
-	StringType test;
-	size_t start = test.find_first_not_of(WHITESPACE);
-	str = (start == std::string::npos) ? str : str.substr(start);
+	//const std::string WHITESPACE = " \n\r\t\f\v";
 
-	// Trim right
-	size_t end = test.find_last_not_of(WHITESPACE);
-	str = (end == std::string::npos) ? str : str.substr(0, end + 1);
+	//size_t start = str.c_str().find_first_not_of(WHITESPACE);
+	//(start == std::string::npos) ? str : str.substr(start);
+
+	//// Trim right
+	//size_t end = str.find_last_not_of(WHITESPACE);
+	//(end == std::string::npos) ? str : str.substr(0, end + 1);
+
+
+
 	// KZ -- Look at trim StringType
 	return str;
 }
 
 //! Splits a string into tokens based on delimiters. All delimiters are returned as tokens themselves.
-template <typename StringType, typename ContainerType>
-inline void tokenize(const StringType & str, ContainerType & tokenContainer, const StringType & delimiters) {
-	typedef typename StringType::value_type CharType;
-	typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
-	boost::char_separator<wchar_t> sep{StringType().c_str(), delimiters.c_str()};
-	tokenizer tok{str, sep};
-	for (const auto & t : tok) {
-		tokenContainer.push_back(t);
-	}
-}
+//template <typename StringType, typename ContainerType>
+//inline void tokenize(const StringType & str, ContainerType & tokenContainer, const StringType & delimiters) {
+//	typedef typename StringType::value_type CharType;
+//	typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
+//	boost::char_separator<wchar_t> sep{StringType().c_str(), delimiters.c_str()};
+//	tokenizer tok{str, sep};
+//	for (const auto & t : tok) {
+//		tokenContainer.push_back(t);
+//	}
+//}
 
 //! Splits a string into tokens based on delimiters. All delimiters are returned as tokens themselves.
 template <typename StringType>
@@ -270,7 +273,8 @@ inline std::list<StringType> tokenize(const StringType & str, const StringType &
 	//tokenizer tok{str, sep};
 
 	// stringstream class check1
-	//stringstream strStream(str);
+	//string s = str.c_str();
+	//std::stringstream strStream(str);
 
 	//// Temp string to hold token
 	//string tok;
@@ -283,6 +287,10 @@ inline std::list<StringType> tokenize(const StringType & str, const StringType &
 	// KZ -- Look at tokenizing with  StringType
 
 	return tokenContainer;
+}
+
+template <typename StringType>
+inline const auto foo(const StringType& s, char delimiter) {
 }
 
 //! Joins a list of strings with a join character.
@@ -316,6 +324,7 @@ template <typename StringType> inline const auto split(const StringType & s, cha
 
 //! Transforms text case. Returns a copy of the original text.
 template <typename StringType> inline StringType transform(const StringType & text, const TextTransform transform) {
+	StringType result(text);
 	switch (transform) {
 		case TextTransform::None:
 			return text;
@@ -325,10 +334,10 @@ template <typename StringType> inline StringType transform(const StringType & te
 			case TextTransform::Lowercase: run->append(boost::locale::to_lower(token)); break;
 			case TextTransform::Capitalize: run->append(boost::locale::to_title(token)); break;*/
 		case TextTransform::Uppercase: 
-			std::transform(text.begin(), text.end(), text.begin(), ::toupper);
-			return text;
-		case TextTransform::Lowercase: 
-			std::transform(text.begin(), text.end(), text.begin(), ::tolower);
+			std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+			return result;
+		case TextTransform::Lowercase:
+			std::transform(result.begin(), result.end(), result.begin(), ::tolower);
 			return text;
 		case TextTransform::Capitalize: return capitalize(text);
 		default: return text;
