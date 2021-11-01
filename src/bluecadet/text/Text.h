@@ -262,44 +262,38 @@ inline StringType trim(StringType& str) {
 	return str;
 }
 
-
-// KZ - Question, this seems to have a boost reference in it but I assume since it doesn't have any calls to it it is not causing 
-// any compile issues?
 //! Splits a string into tokens based on delimiters. All delimiters are returned as tokens themselves.
 template <typename StringType, typename ContainerType>
 inline void tokenize(const StringType & str, ContainerType & tokenContainer, const StringType & delimiters) {
 	typedef typename StringType::value_type CharType;
-	typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
-	boost::char_separator<wchar_t> sep{StringType().c_str(), delimiters.c_str()};
-	tokenizer tok{str, sep};
-	for (const auto & t : tok) {
-		tokenContainer.push_back(t);
+
+	std::basic_stringstream<CharType> stringStream(str);
+	StringType line;
+
+	while (std::getline(stringStream, line))
+	{
+		std::size_t prev = 0, pos;
+		while ((pos = line.find_first_of(delimiters, prev)) != std::string::npos)
+		{
+			if (pos > prev) {
+				// push substring between last delimiter and this one
+				tokenContainer.push_back(line.substr(prev, pos - prev));
+				// push delimiter
+				tokenContainer.push_back(line.substr(pos, 1));
+			}
+			prev = pos + 1;
+		}
+		if (prev < line.length())
+			tokenContainer.push_back(line.substr(prev, std::string::npos));
 	}
+
 }
 
 //! Splits a string into tokens based on delimiters. All delimiters are returned as tokens themselves.
 template <typename StringType>
 inline std::list<StringType> tokenize(const StringType & str, const StringType & delimiters) {
 	std::list<StringType> tokenContainer;
-	//typedef typename StringType::value_type CharType;
-	//typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
-	//boost::char_separator<wchar_t> sep{StringType().c_str(), delimiters.c_str()};
-	//tokenizer tok{str, sep};
-
-	// stringstream class check1
-	//string s = str.c_str();
-	//std::stringstream strStream(str);
-
-	//// Temp string to hold token
-	//string tok;
-
-	//while (getline(strStream, tok, delimiters)) {
-	//	// Push token into container
-	//	tokenContainer.push_back(tok);
-	//}
-	// 
-	// KZ -- Look at tokenizing with  StringType
-
+	tokenize(str, tokenContainer, delimiters);
 	return tokenContainer;
 }
 
