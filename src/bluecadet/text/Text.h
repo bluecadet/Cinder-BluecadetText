@@ -10,8 +10,19 @@
 #include <string>
 #include <sstream> 
 
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
+/* Added in cinder 0.9.3 upgrades */
+#include <clocale>
+#include <cwctype>
+
+#include <iostream>
+#include <algorithm>
+
+/* Commented out in cinder 0.9.3 upgrades */
+//#include <boost/algorithm/string.hpp>
+//#include <boost/tokenizer.hpp>
+
+/* EOF file/header comments additions */
+
 
 namespace bluecadet {
 namespace text {
@@ -221,32 +232,71 @@ inline std::string colorToHexStr(const ci::ColorA & color, const std::string & p
 //==================================================
 // Text helpers
 //
+//! Trim leading and trailing white space
+template <typename StringType>
+inline StringType trim(StringType& str) {
+	// Trim left
+	//const std::string WHITESPACE = " \n\r\t\f\v";
+
+	//size_t start = str.find_first_not_of(WHITESPACE);
+	//(start == std::string::npos) ? str : str.substr(start);
+
+	//// Trim right
+	//size_t end = str.find_last_not_of(WHITESPACE);
+	//(end == std::string::npos) ? str : str.substr(0, end + 1);
+	// TODO: Test trim
+	auto start = str.begin();
+	while (start != str.end() && std::isspace(*start)) {
+		start++;
+	}
+
+	auto end = str.end();
+	do {
+		end--;
+	} while (std::distance(start, end) > 0 && std::isspace(*end));
+
+	return StringType(start, end + 1);
+
+
+	// KZ -- Look at trim StringType
+	return str;
+}
 
 //! Splits a string into tokens based on delimiters. All delimiters are returned as tokens themselves.
 template <typename StringType, typename ContainerType>
 inline void tokenize(const StringType & str, ContainerType & tokenContainer, const StringType & delimiters) {
 	typedef typename StringType::value_type CharType;
-	typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
-	boost::char_separator<wchar_t> sep{StringType().c_str(), delimiters.c_str()};
-	tokenizer tok{str, sep};
-	for (const auto & t : tok) {
-		tokenContainer.push_back(t);
+
+	std::basic_stringstream<CharType> stringStream(str);
+	StringType line;
+
+	while (std::getline(stringStream, line))
+	{
+		std::size_t prev = 0, pos;
+		while ((pos = line.find_first_of(delimiters, prev)) != std::string::npos)
+		{
+			if (pos > prev) {
+				// push substring between last delimiter and this one
+				tokenContainer.push_back(line.substr(prev, pos - prev));
+				// push delimiter
+				tokenContainer.push_back(line.substr(pos, 1));
+			}
+			prev = pos + 1;
+		}
+		if (prev < line.length())
+			tokenContainer.push_back(line.substr(prev, std::string::npos));
 	}
+
 }
 
 //! Splits a string into tokens based on delimiters. All delimiters are returned as tokens themselves.
 template <typename StringType>
 inline std::list<StringType> tokenize(const StringType & str, const StringType & delimiters) {
 	std::list<StringType> tokenContainer;
-	typedef typename StringType::value_type CharType;
-	typedef boost::tokenizer<boost::char_separator<wchar_t>, typename StringType::const_iterator, StringType> tokenizer;
-	boost::char_separator<wchar_t> sep{StringType().c_str(), delimiters.c_str()};
-	tokenizer tok{str, sep};
-	for (const auto & t : tok) {
-		tokenContainer.push_back(t);
-	}
+	tokenize(str, tokenContainer, delimiters);
 	return tokenContainer;
 }
+
 
 //! Joins a list of strings with a join character.
 template <typename StringType, typename ContainerType>
@@ -279,6 +329,7 @@ template <typename StringType> inline const auto split(const StringType & s, cha
 
 //! Transforms text case. Returns a copy of the original text.
 template <typename StringType> inline StringType transform(const StringType & text, const TextTransform transform) {
+	StringType result(text);
 	switch (transform) {
 		case TextTransform::None:
 			return text;
@@ -287,8 +338,12 @@ template <typename StringType> inline StringType transform(const StringType & te
 			/*case TextTransform::Uppercase: run->append(boost::locale::to_upper(token)); break;
 			case TextTransform::Lowercase: run->append(boost::locale::to_lower(token)); break;
 			case TextTransform::Capitalize: run->append(boost::locale::to_title(token)); break;*/
-		case TextTransform::Uppercase: return boost::algorithm::to_upper_copy(text);
-		case TextTransform::Lowercase: return boost::algorithm::to_lower_copy(text);
+		case TextTransform::Uppercase: 
+			std::transform(result.begin(), result.end(), result.begin(), ::toupper);
+			return result;
+		case TextTransform::Lowercase:
+			std::transform(result.begin(), result.end(), result.begin(), ::tolower);
+			return text;
 		case TextTransform::Capitalize: return capitalize(text);
 		default: return text;
 	}
